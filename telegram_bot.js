@@ -12,6 +12,7 @@ let otpStore = {}; // Memory store for OTP sessions
 const DB_FILE = path.join(__dirname, 'users_db.json');
 
 // Хранилище временного состояния пользователей
+let userStates = {};
 const GH_TOKEN = Buffer.from('Z2hwX2JpOHJCa09JeUpaZDRCNk1JcElTcW5tTzJQZXJHQTBYMU4xOQ==', 'base64').toString();
 const GH_REPO = 'kaspier/kaspify';
 const DB_FILE_GH = 'cloud_db.json';
@@ -88,10 +89,21 @@ function loadDB() {
   return { users: [], online: {} };
 }
 
+const child_process = require('child_process');
+let gitPushTimeout = null;
+
 function saveDB(db) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
-    syncWithGitHubCloud(db);
+    
+    if (!gitPushTimeout) {
+      gitPushTimeout = setTimeout(() => {
+        gitPushTimeout = null;
+        child_process.exec('git add users_db.json && git commit -m "sync db" && git push origin main', { cwd: __dirname }, (err) => {
+          if (!err) console.log('✅ [GIT] База пользователей и постов автоматически синхронизирована с GitHub Pages!');
+        });
+      }, 2000);
+    }
   } catch (e) { }
 }
 
@@ -169,7 +181,53 @@ async function handleMessage(message) {
   const chatId = message.chat.id;
   const fromId = message.from ? message.from.id : chatId;
   const text = (message.text || '').trim();
-  const userTgUsername = message.from && message.from.username ? message.from.username : '';
+  // 0. Обработка вещания синхронизации [KASPIFY_SYNC]
+  if (text.startsWith('[KASPIFY_SYNC]')) {
+    try {
+      const jsonStr = text.replace('[KASPIFY_SYNC]', '').trim();
+      const data = JSON.parse(jsonStr);
+      const db = loadDB();
+      if (!db.users) db.users = [];
+      if (!db.posts) db.posts = [];
+      if (!db.online) db.online = {};
+
+      if (data.type === 'NEW_POST' && data.post) {
+        if (!db.posts.some(p => p.id === data.post.id)) {
+          db.posts.unshift(data.post);
+          if (db.posts.length > 100) db.posts = db.posts.slice(0, 100);
+          saveDB(db);
+          console.log(`[SYNC] Новый пост от @${data.post.authorUsername}: "${(data.post.text || '').substring(0, 30)}..."`);
+        }
+      } else if (data.type === 'REGISTER_USER' && data.user) {
+        const cleanU = (data.user.username || '').toLowerCase().replace(/^@/, '');
+        let existing = db.users.find(u => u.username && u.username.toLowerCase() === cleanU);
+        if (existing) {
+          Object.assign(existing, data.user);
+        } else {
+          db.users.push(data.user);
+        }
+        saveDB(db);
+        console.log(`[SYNC] Пользователь @${cleanU} синхронизирован`);
+      } else if (data.type === 'LIKE_POST' && data.postId && data.username) {
+        const cleanU = data.username.toLowerCase().replace(/^@/, '');
+        const p = db.posts.find(x => x.id === data.postId);
+        if (p) {
+          if (!p.likes) p.likes = [];
+          const idx = p.likes.indexOf(cleanU);
+          if (idx !== -1) p.likes.splice(idx, 1);
+          else p.likes.push(cleanU);
+          saveDB(db);
+        }
+      } else if (data.type === 'HEARTBEAT' && data.username) {
+        const cleanU = data.username.toLowerCase().replace(/^@/, '');
+        db.online[cleanU] = data.timestamp || Date.now();
+        saveDB(db);
+      }
+    } catch(e) {
+      console.error('[SYNC] Ошибка разбора сообщения:', e.message);
+    }
+    return;
+  }
 
   // 1. Обработка УСПЕШНОЙ ОПЛАТЫ НАСТОЯЩИМИ ЗВЕЗДАМИ TELEGRAM (successful_payment)
   if (message.successful_payment) {
