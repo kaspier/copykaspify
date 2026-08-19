@@ -124,11 +124,12 @@ window.KaspifyDB = (function() {
         if (data && data.success) {
           const users = getLocalUsers();
           let existing = users.find(u => u.username && u.username.toLowerCase() === cleanId);
-          if (!existing) {
-            existing = createLocalUser(cleanId);
+          if (existing) {
+            setCurrentUser(existing);
+            return { success: true, isNewUser: false, user: existing };
+          } else {
+            return { success: true, isNewUser: true, identifier: cleanId };
           }
-          setCurrentUser(existing);
-          return { success: true, isNewUser: false, user: existing };
         }
       }
     } catch (e) {}
@@ -140,11 +141,12 @@ window.KaspifyDB = (function() {
 
     const users = getLocalUsers();
     let existing = users.find(u => u.username && u.username.toLowerCase() === cleanId);
-    if (!existing) {
-      existing = createLocalUser(cleanId);
+    if (existing) {
+      setCurrentUser(existing);
+      return { success: true, isNewUser: false, user: existing };
+    } else {
+      return { success: true, isNewUser: true, identifier: cleanId };
     }
-    setCurrentUser(existing);
-    return { success: true, isNewUser: false, user: existing };
   }
 
   async function apiCompleteRegistration(profileData) {
