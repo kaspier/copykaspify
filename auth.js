@@ -6,7 +6,7 @@
 window.KaspifyDB = (function() {
   const API_BASE = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
       ? 'http://localhost:8888/api' 
-      : (window.KASPIFY_API_URL || '/api');
+      : (window.location.hostname.includes('onrender.com') ? '/api' : 'https://copykaspify.onrender.com/api');
   const STORAGE_KEY_USERS = 'kaspi_users_db';
   const STORAGE_KEY_ACTIVE = 'kaspi_active_username';
   const STORAGE_KEY_AUTH = 'kaspi_is_authenticated';

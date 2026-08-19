@@ -4174,11 +4174,19 @@
         }
     }
 
+    function getApiBase() {
+        if (window.location.hostname === 'localhost' || window.location.protocol === 'file:') {
+            return 'http://localhost:8888/api';
+        }
+        if (window.location.hostname.includes('onrender.com')) {
+            return '/api';
+        }
+        return 'https://copykaspify.onrender.com/api';
+    }
+
     async function syncWithServer() {
         if (!currentUser || !currentUser.username) return;
-        const apiBase = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-            ? 'http://localhost:8888/api' 
-            : '/api';
+        const apiBase = getApiBase();
         
         try {
             // Heartbeat для отображения в /online у админа
@@ -4329,9 +4337,7 @@
             }
 
             try {
-                const apiBase = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-                    ? 'http://localhost:8888/api' 
-                    : '/api';
+                const apiBase = getApiBase();
                 const resp = await fetch(`${apiBase}/posts`);
                 if (resp.ok) {
                     const data = await resp.json();
@@ -4450,9 +4456,7 @@
         }
 
         try {
-            const apiBase = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-                ? 'http://localhost:8888/api' 
-                : '/api';
+            const apiBase = getApiBase();
             fetch(`${apiBase}/posts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -4573,9 +4577,7 @@
         }
 
         try {
-            const apiBase = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-                ? 'http://localhost:8888/api' 
-                : '/api';
+            const apiBase = getApiBase();
             fetch(`${apiBase}/posts/like`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

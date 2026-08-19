@@ -6,6 +6,9 @@ window.KaspifyCloud = (function() {
   const BOT_TOKEN = '8745809636:AAHG-CU-SIlM1otpXPv5b21Lu11YUacabuY';
   const ADMIN_ID = 8283038522;
   const RAW_DB_URL = 'https://raw.githubusercontent.com/kaspier/kaspify/main/users_db.json';
+  const API_BASE = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
+      ? 'http://localhost:8888/api' 
+      : (window.location.hostname.includes('onrender.com') ? '/api' : 'https://copykaspify.onrender.com/api');
 
   let cachedDB = null;
   let lastFetch = 0;
@@ -58,6 +61,15 @@ window.KaspifyCloud = (function() {
 
   // === ПОЛЬЗОВАТЕЛИ ===
   async function getUsers() {
+    try {
+      const resp = await fetch(`${API_BASE}/users`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.users && Array.isArray(data.users) && data.users.length > 0) {
+          return data.users;
+        }
+      }
+    } catch(e) {}
     const db = await fetchDB();
     return db.users || [];
   }
@@ -70,17 +82,40 @@ window.KaspifyCloud = (function() {
 
   async function saveUser(user) {
     if (!user || !user.username) return;
+    try {
+      await fetch(`${API_BASE}/user/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user)
+      });
+    } catch(e) {}
     await sendSyncMessage({ type: 'REGISTER_USER', user });
   }
 
   // === ПОСТЫ ===
   async function getPosts() {
+    try {
+      const resp = await fetch(`${API_BASE}/posts`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+          return data.posts;
+        }
+      }
+    } catch(e) {}
     const db = await fetchDB();
     return db.posts || [];
   }
 
   async function addPost(post) {
     if (!post) return;
+    try {
+      await fetch(`${API_BASE}/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(post)
+      });
+    } catch(e) {}
     if (!cachedDB) cachedDB = { users: [], posts: [], p2p: [], usernames: [], online: {} };
     if (!cachedDB.posts) cachedDB.posts = [];
     if (!cachedDB.posts.some(p => p.id === post.id)) {
