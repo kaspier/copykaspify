@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kaspi.kz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #f2f2f7; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; overflow-x: hidden; overscroll-behavior-y: none; }
+        
+        .app-container { 
+            background: white; width: 100%; min-height: 100vh; min-height: 100dvh; height: 100dvh; 
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+        }
+        @media (min-width: 500px) {
+            .app-container { max-width: 480px; margin: 0 auto; }
+        }
+
+        /* Шапка */
+        .header { padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 8px; display: flex; align-items: center; gap: 16px; background: white; z-index: 10; border-bottom: 1px solid #eef0f2;}
+        .search-bar {
+            flex: 1; background: #f1f2f4; padding: 10px 16px; border-radius: 12px;
+            color: #8e8e93; font-size: 15px; font-weight: 400; display: flex; align-items: center; cursor: pointer;
+        }
+        .cart-icon-wrapper { position: relative; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer;}
+        .cart-icon-wrapper svg { width: 24px; height: 24px; stroke: #8e8e93; fill: none; stroke-width: 2; }
+
+        .scroll-content { flex: 1; overflow-y: auto; padding-bottom: 10px; }
+        .scroll-content::-webkit-scrollbar { display: none; }
+
+        /* Баннеры */
+        .banners-wrapper { padding: 12px 0 12px 16px; }
+        .banners { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-right: 16px; }
+        .banners::-webkit-scrollbar { display: none; }
+        .banner { 
+            min-width: 160px; height: 92px; border-radius: 14px; padding: 12px;
+            position: relative; scroll-snap-align: start; flex-shrink: 0; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: flex-start;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer;
+        }
+        .banner-gift { background: linear-gradient(135deg, #e8b5f0 0%, #c77ddb 50%, #a855d4 100%); }
+        .banner-gift::before { content: "🎁"; position: absolute; right: 10px; bottom: 8px; font-size: 36px; opacity: 0.4; }
+        .banner-furniture { background: #f5f0eb; }
+        .banner-furniture::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=500&auto=format&fit=crop') center/cover; z-index: 0; border-radius: 14px; }
+        .banner-furniture::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 100%); z-index: 0; border-radius: 14px; }
+
+        .banner-title { font-size: 13px; font-weight: 700; position: relative; z-index: 2; line-height: 1.3; }
+        .banner-gift .banner-title { color: white; }
+        .banner-furniture .banner-title { color: #1a1a1a; }
+        .banner-subtitle { font-size: 11px; position: relative; z-index: 2; margin-top: 2px; }
+        .banner-gift .banner-subtitle { color: rgba(255,255,255,0.85); }
+        .banner-pill { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; margin-top: 6px; position: relative; z-index: 2; }
+        .pill-red { background: #f14635; color: white; }
+        .pill-yellow { background: #ffbe00; color: #1a1a1a; }
+
+        /* Сервисы */
+        .services-grid { 
+            display: grid; grid-template-columns: repeat(4, 1fr); 
+            gap: 18px 0px; padding: 12px 8px 20px; border-bottom: 8px solid #f1f2f4;
+        }
+        .service-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; position: relative; color: inherit; }
+        .icon-wrap { 
+            width: 44px; height: 44px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; 
+        }
+        .icon-wrap svg { width: 34px; height: 34px; stroke: #e62e24; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        
+        .service-name { font-size: 11px; color: #1a1a1a; font-weight: 500; letter-spacing: -0.2px; line-height: 1.2; }
+        .magnum-icon-wrap {
+            width: 44px; height: 44px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Промо блоки */
+        .promos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; padding: 14px 16px 8px; }
+        .promo-item { display: flex; align-items: center; gap: 10px; background: white; border-radius: 10px; padding: 8px 4px; cursor: pointer; }
+        .promo-icon-box { 
+            width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 11px; color: white; flex-shrink: 0; text-align: center; line-height: 1.1;
+        }
+        .bg-red { background: #f14635; }
+        .bg-green { background: #52c41a; }
+        .bg-yellow { background: #ffc107; color: #1a1a1a; }
+        .promo-text h4 { font-size: 13px; color: #1a1a1a; font-weight: 600; line-height: 1.2; }
+        .promo-text p { font-size: 11px; color: #8e8e93; margin-top: 1px; }
+        .text-red { color: #f14635 !important; font-weight: 600; }
+
+        /* Баннер Magnum */
+        .magnum-banner-container { padding: 8px 16px 12px; }
+        .magnum-banner {
+            background: linear-gradient(135deg, #ff1475 0%, #ff3b8d 50%, #ff6b9d 100%); border-radius: 16px;
+            padding: 16px 20px; cursor: pointer; position: relative; overflow: hidden;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 12px rgba(255, 20, 117, 0.25);
+        }
+        .magnum-banner-left { position: relative; z-index: 2; }
+        .magnum-banner-logo { font-size: 26px; font-weight: 900; color: white; font-family: 'Inter', sans-serif; letter-spacing: -1px; }
+        .magnum-pill { background: #26c07d; color: white; display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 700; margin-top: 4px; }
+        .magnum-banner-sub { color: rgba(255,255,255,0.9); font-size: 11px; margin-top: 4px; font-weight: 500; }
+        .magnum-banner-right { font-size: 40px; }
+
+        /* Раздел "Вы недавно смотрели" */
+        .recently-section { padding: 16px 16px 8px; }
+        .recently-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; }
+        .recently-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+        .recently-scroll::-webkit-scrollbar { display: none; }
+        .recently-item {
+            min-width: 130px; max-width: 130px; background: white; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06); flex-shrink: 0; cursor: pointer; border: 1px solid #f2f2f7;
+        }
+        .recently-img { width: 100%; height: 100px; object-fit: cover; }
+        .recently-img-container { position: relative; }
+        .recently-badge { 
+            position: absolute; top: 6px; left: 6px; background: #f14635; color: white; 
+            font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+        }
+        .recently-bonus { 
+            position: absolute; bottom: 6px; left: 6px; background: #2db53b; color: white;
+            font-size: 9px; font-weight: 600; padding: 2px 5px; border-radius: 10px;
+        }
+        .recently-info { padding: 8px; }
+        .recently-name { font-size: 11px; color: #1a1a1a; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .recently-price { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-top: 4px; }
+        .recently-heart { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; background: rgba(255,255,255,0.85); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .recently-heart svg { width: 12px; height: 12px; stroke: #f14635; fill: none; stroke-width: 2; }
+
+        /* Нижнее меню */
+        .bottom-nav {
+            display: flex; justify-content: space-around; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid #eef0f2; background: #fafafa; position: sticky; bottom: 0; width: 100%; z-index: 10;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #8e8e93; font-size: 10px; font-weight: 500; gap: 3px; cursor: pointer; text-decoration: none; }
+        .nav-icon svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-item.active { color: #f14635; }
+
+        @media (max-width: 430px) {
+            .app-container { max-width: 100% !important; width: 100% !important; }
+            .header { padding: calc(10px + env(safe-area-inset-top, 0px)) 12px 8px; gap: 10px; }
+            .search-bar { padding: 9px 12px; font-size: 14px; }
+            .banners-wrapper { padding: 10px 0 10px 12px; }
+            .banner { min-width: 148px; height: 85px; padding: 10px; }
+            .services-grid { gap: 16px 0; padding: 12px 4px 20px; }
+            .icon-wrap { width: 44px; height: 44px; border-radius: 12px; }
+            .icon-wrap svg { width: 24px; height: 24px; }
+            .magnum-icon-wrap { width: 44px; height: 44px; border-radius: 12px; }
+            .service-name { font-size: 10px; }
+            .promos-grid { gap: 2px 8px; padding: 12px 12px 6px; }
+            .promo-item { padding: 8px 2px; gap: 8px; }
+            .promo-icon-box { width: 36px; height: 36px; font-size: 9px; border-radius: 8px; }
+            .promo-text h4 { font-size: 12px; }
+            .promo-text p { font-size: 10px; }
+            .magnum-banner-container { padding: 6px 12px 10px; }
+            .magnum-banner { padding: 14px 16px; }
+            .magnum-banner-logo { font-size: 20px; }
+            .magnum-banner-text { font-size: 14px; }
+            .recently-section { padding: 12px 12px 6px; }
+            .recently-title { font-size: 14px; margin-bottom: 10px; }
+            .recently-item { min-width: 120px; max-width: 120px; }
+            .recently-img { height: 90px; }
+            .bottom-nav { padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px)); }
+            .nav-item { font-size: 9px; gap: 2px; }
+            .nav-icon svg { width: 20px; height: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="search-bar" onclick="openSearchModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2.5" style="margin-right: 8px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Поиск по Kaspi.kz</span>
+        </div>
+        <div class="cart-icon-wrapper" onclick="showToast('Корзина пуста')">
+            <svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        </div>
+    </div>
+
+    <div class="scroll-content">
+        <!-- Баннеры -->
+        <div class="banners-wrapper">
+            <div class="banners">
+                <div class="banner banner-gift" onclick="showToast('Подарите сертификат')">
+                    <div class="banner-title">Подарите<br>сертификат</div>
+                    <div class="banner-subtitle">Выберите<br>любую сумму</div>
+                </div>
+                <div class="banner banner-furniture" onclick="showToast('Раздел Мебель')">
+                    <div class="banner-title">Мебель</div>
+                    <div class="banner-pill pill-red">0•0•12</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сервисы -->
+        <div class="services-grid">
+            <div class="service-item" onclick="showToast('Раздел Магазин')">
+                <div class="icon-wrap">
+                    <svg viewBox="0 0 32 32"><path d="M4 6h4l3.2 12.8a2 2 0 0 0 1.9 1.5h11.8a2 2 0 0 0 1.9-1.4L28 9H8.2" fill="none" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="25" r="2" fill="#e62e24"/><circle cx="23" cy="25" r="2" fill="#e62e24"/></svg>
+                </div>
+                <div class="service-name">Магазин</div>
+            </div>
+            <a href="bank.html" class="service-item">
+                <div class="icon-wrap">
+                    <svg viewBox="0 0 32 32"><rect x="6" y="4" width="12" height="22" rx="2.5" fill="none" stroke="#e62e24" stroke-width="2.3"/><rect x="12" y="12" width="15" height="11" rx="2" fill="none" stroke="#e62e24" stroke-width="2.3"/><line x1="12" y1="16" x2="27" y2="16" stroke="#e62e24" stroke-width="2.3"/></svg>
+                </div>
+                <div class="service-name">Мой Банк</div>
+            </a>
+            <a href="bank.html#payment" class="service-item">
+                <div class="icon-wrap">
+                    <svg viewBox="0 0 32 32"><path d="M8 5h16a2 2 0 0 1 2 2v20l-3-2-3 2-3-2-3 2-3-2-3 2V7a2 2 0 0 1 2-2z" fill="none" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="11" x2="20" y2="11" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round"/><line x1="12" y1="16" x2="20" y2="16" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round"/><line x1="12" y1="21" x2="16" y2="21" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round"/></svg>
+                </div>
+                <div class="service-name">Платежи</div>
+            </a>
+            <a href="bank.html#transfer" class="service-item">
+                <div class="icon-wrap">
+                    <svg viewBox="0 0 32 32"><path d="M22 6l5 5-5 5" fill="none" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11h22" fill="none" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round"/><path d="M10 16l-5 5 5 5" fill="none" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 21H5" fill="none" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round"/></svg>
+                </div>
+                <div class="service-name">Переводы</div>
+            </a>
+            <div class="service-item" onclick="showToast('Супермаркет Magnum')">
+                <div class="magnum-icon-wrap">
+                    <svg viewBox="0 0 44 44" width="44" height="44"><rect width="44" height="44" rx="12" fill="#e31836"/><path d="M12 29V18c0-1.8 1.2-3 3-3 1.6 0 2.8 1 3.2 2.5.6-1.5 1.8-2.5 3.4-2.5 2 0 3.4 1.4 3.4 3.5V29h-3.2v-8.5c0-1-.6-1.6-1.5-1.6-.9 0-1.6.6-1.6 1.6V29h-3.2v-8.5c0-1-.6-1.6-1.5-1.6-.9 0-1.6.6-1.6 1.6V29H12z" fill="white"/></svg>
+                </div>
+                <div class="service-name">Magnum</div>
+            </div>
+            <div class="service-item" onclick="showToast('Kaspi Travel')">
+                <div class="icon-wrap">
+                    <svg viewBox="0 0 32 32"><rect x="6" y="10" width="20" height="17" rx="3.5" fill="none" stroke="#e62e24" stroke-width="2.3"/><path d="M12 10V6.5a2.5 2.5 0 0 1 2.5-2.5h3a2.5 2.5 0 0 1 2.5 2.5V10" fill="none" stroke="#e62e24" stroke-width="2.3"/><path d="M12 18a4 4 0 0 0 8 0" fill="none" stroke="#e62e24" stroke-width="2.3" stroke-linecap="round"/></svg>
+                </div>
+                <div class="service-name">Travel</div>
+            </div>
+            <a href="ydo.html" class="service-item">
+                <div class="icon-wrap">
+                    <svg viewBox="0 0 32 32"><path d="M16 3v4M16 3l4 2-4 2" fill="none" stroke="#e62e24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11l10-4 10 4v2H6v-2z" fill="none" stroke="#e62e24" stroke-width="2.2" stroke-linejoin="round"/><line x1="9" y1="13" x2="9" y2="24" stroke="#e62e24" stroke-width="2.2"/><line x1="14" y1="13" x2="14" y2="24" stroke="#e62e24" stroke-width="2.2"/><line x1="18" y1="13" x2="18" y2="24" stroke="#e62e24" stroke-width="2.2"/><line x1="23" y1="13" x2="23" y2="24" stroke="#e62e24" stroke-width="2.2"/><line x1="4" y1="24" x2="28" y2="24" stroke="#e62e24" stroke-width="2.2" stroke-linecap="round"/><line x1="3" y1="27" x2="29" y2="27" stroke="#e62e24" stroke-width="2.2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="service-name">Госуслуги</div>
+            </a>
+            <div class="service-item" onclick="showToast('Объявления Kaspi')">
+                <div class="icon-wrap">
+                    <svg viewBox="0 0 32 32"><rect x="5" y="5" width="22" height="22" rx="3.5" fill="none" stroke="#e62e24" stroke-width="2.3"/><line x1="5" y1="12" x2="27" y2="12" stroke="#e62e24" stroke-width="2.3"/><line x1="16" y1="12" x2="16" y2="27" stroke="#e62e24" stroke-width="2.3"/><line x1="8" y1="16" x2="13" y2="16" stroke="#e62e24" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="20" x2="13" y2="20" stroke="#e62e24" stroke-width="2" stroke-linecap="round"/><line x1="19" y1="16" x2="24" y2="16" stroke="#e62e24" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="service-name">Объявления</div>
+            </div>
+        </div>
+
+        <!-- Промо блоки -->
+        <div class="promos-grid">
+            <div class="promo-item" onclick="showToast('Рассрочка 0-0-12')">
+                <div class="promo-icon-box bg-red" style="font-size: 11px; font-weight: 800;">0•0•12</div>
+                <div class="promo-text"><h4>Рассрочка 0%</h4></div>
+            </div>
+            <div class="promo-item" onclick="showToast('Кредит наличными')">
+                <div class="promo-icon-box bg-green">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="12" cy="15" r="2"/></svg>
+                </div>
+                <div class="promo-text"><h4>Кредит Наличными</h4><p>до 2 млн ₸ на Kaspi</p></div>
+            </div>
+            <div class="promo-item" onclick="showToast('Kaspi Red+')">
+                <div class="promo-icon-box bg-red" style="font-size: 11px; font-weight: 800;">Red+</div>
+                <div class="promo-text"><h4>Kaspi Red+</h4><p>Рассрочка до 500 000 ₸</p></div>
+            </div>
+            <div class="promo-item" onclick="showToast('Kaspi Депозит')">
+                <div class="promo-icon-box bg-yellow">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/></svg>
+                </div>
+                <div class="promo-text"><h4>Накопительный</h4><p class="text-red">Депозит до 18%</p></div>
+            </div>
+        </div>
+
+        <!-- Баннер Magnum -->
+        <div class="magnum-banner-container">
+            <div class="magnum-banner" onclick="showToast('Magnum Бонусы')">
+                <div class="magnum-banner-left">
+                    <div class="magnum-banner-logo">magnum</div>
+                    <div class="magnum-pill">2000 Бонусов</div>
+                    <div class="magnum-banner-sub">при заказе от 10 000 ₸</div>
+                </div>
+                <div class="magnum-banner-right">🛒</div>
+            </div>
+        </div>
+
+        <!-- Вы недавно смотрели -->
+        <div class="recently-section">
+            <div class="recently-title">Вы недавно смотрели</div>
+            <div class="recently-scroll">
+                <div class="recently-item" onclick="showToast('Apple MacBook Air')">
+                    <div class="recently-img-container">
+                        <img class="recently-img" src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=300&auto=format&fit=crop" alt="MacBook">
+                        <div class="recently-badge">0•0•12</div>
+                        <div class="recently-bonus">10% ❤</div>
+                        <div class="recently-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                    </div>
+                    <div class="recently-info"><div class="recently-name">Apple MacBook...</div><div class="recently-price">549 990 ₸</div></div>
+                </div>
+                <div class="recently-item" onclick="showToast('Apple iPhone 16')">
+                    <div class="recently-img-container">
+                        <img class="recently-img" src="https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?q=80&w=300&auto=format&fit=crop" alt="iPhone">
+                        <div class="recently-badge">0•0•12</div>
+                        <div class="recently-bonus">10% ❤</div>
+                        <div class="recently-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                    </div>
+                    <div class="recently-info"><div class="recently-name">Apple iPhone 16...</div><div class="recently-price">389 990 ₸</div></div>
+                </div>
+                <div class="recently-item" onclick="showToast('LED Samsung')">
+                    <div class="recently-img-container">
+                        <img class="recently-img" src="https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=300&auto=format&fit=crop" alt="TV">
+                        <div class="recently-badge">0•0•12</div>
+                        <div class="recently-bonus">4% ❤</div>
+                        <div class="recently-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                    </div>
+                    <div class="recently-info"><div class="recently-name">LED Samsung 11...</div><div class="recently-price">129 990 ₸</div></div>
+                </div>
+                <div class="recently-item" onclick="showToast('Dyson V15')">
+                    <div class="recently-img-container">
+                        <img class="recently-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=300&auto=format&fit=crop" alt="Vacuum">
+                        <div class="recently-badge">0•0•12</div>
+                        <div class="recently-bonus">5% ❤</div>
+                        <div class="recently-heart"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                    </div>
+                    <div class="recently-info"><div class="recently-name">Dyson V15 Detect</div><div class="recently-price">299 990 ₸</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"/></svg>
+            </div>
+            Главная
+        </div>
+        <a href="bank.html#payment" class="nav-item">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24"><path d="M3 8V5a2 2 0 0 1 2-2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
+            </div>
+            Kaspi QR
+        </a>
+        <a href="bank.html#receipt" class="nav-item">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7A8.38 8.38 0 0 1 4 11.5a8.5 8.5 0 1 1 17 0z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
+            </div>
+            Сообщения
+        </a>
+        <div class="nav-item" onclick="showToast('Все сервисы Kaspi.kz')">
+            <div class="nav-icon">
+                <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            </div>
+            Сервисы
+        </div>
+    </nav>
+</div>
+
+<!-- ПОИСКОВЫЙ МОДАЛ -->
+<div id="search-modal" style="display: none; position: fixed; inset: 0; background: white; z-index: 2000; flex-direction: column;">
+    <div style="padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #eef0f2;">
+        <div class="search-bar" style="background: #f1f2f4; padding: 8px 14px; flex: 1;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2.5" style="margin-right: 8px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="search-input" placeholder="Поиск по Kaspi.kz" style="border:none; background:transparent; font-size:16px; outline:none; width:100%;" oninput="filterSearch(this.value)">
+        </div>
+        <span onclick="closeSearchModal()" style="color: #0089d0; font-size: 16px; font-weight: 500; cursor: pointer;">Отмена</span>
+    </div>
+    <div style="flex: 1; overflow-y: auto; padding: 16px;" id="search-results">
+        <div style="font-size: 13px; color: #8e8e93; font-weight: 600; text-transform: uppercase; margin-bottom: 12px;">Популярные запросы</div>
+        <a href="bank.html#transfer" class="search-item" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f9f9f9; text-decoration:none; color:#1a1a1a;">
+            <span style="margin-right:12px; font-size:18px;">🔄</span>
+            <div><div style="font-size:15px; font-weight:500;">Переводы на Kaspi Gold</div><div style="font-size:12px; color:#8e8e93;">Мой Банк • Переводы</div></div>
+        </a>
+        <a href="bank.html#payment" class="search-item" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f9f9f9; text-decoration:none; color:#1a1a1a;">
+            <span style="margin-right:12px; font-size:18px;">📱</span>
+            <div><div style="font-size:15px; font-weight:500;">Оплата Kaspi QR</div><div style="font-size:12px; color:#8e8e93;">Платежи • Оплата в магазинах</div></div>
+        </a>
+        <a href="ydo.html" class="search-item" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f9f9f9; text-decoration:none; color:#1a1a1a;">
+            <span style="margin-right:12px; font-size:18px;">🏛️</span>
+            <div><div style="font-size:15px; font-weight:500;">Цифровые документы (eGov)</div><div style="font-size:12px; color:#8e8e93;">Госуслуги • Удостоверение</div></div>
+        </a>
+    </div>
+</div>
+
+<!-- TOAST УВЕДОМЛЕНИЯ -->
+<div id="toast-notification" style="display: none; position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: rgba(30, 30, 30, 0.92); color: white; padding: 12px 20px; border-radius: 24px; font-size: 14px; font-weight: 500; z-index: 9999; box-shadow: 0 4px 14px rgba(0,0,0,0.25); text-align: center; white-space: nowrap; backdrop-filter: blur(8px); animation: fadeIn 0.2s ease-out;">
+    <span id="toast-text">Сообщение</span>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

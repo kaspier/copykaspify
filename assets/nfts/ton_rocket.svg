@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="rocketBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="70%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    <linearGradient id="rocketFin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <linearGradient id="fireGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+  </defs>
+  <!-- Flame Thrust -->
+  <path d="M48,84 Q60,118 60,118 Q60,118 72,84 Z" fill="url(#fireGrad)"/>
+  <path d="M52,84 Q60,105 60,105 Q60,105 68,84 Z" fill="#fef08a"/>
+  <!-- Rocket Body -->
+  <path d="M60,14 C48,34 46,70 46,84 L74,84 C74,70 72,34 60,14 Z" fill="url(#rocketBody)"/>
+  <!-- Rocket Nosecone -->
+  <path d="M60,14 C54,26 50,38 50,38 L70,38 C70,38 66,26 60,14 Z" fill="url(#rocketFin)"/>
+  <!-- Porthole Window -->
+  <circle cx="60" cy="52" r="10" fill="#0284c7"/>
+  <circle cx="60" cy="52" r="7" fill="#38bdf8"/>
+  <circle cx="58" cy="50" r="2.5" fill="#ffffff"/>
+  <!-- Rocket Wings / Fins -->
+  <path d="M46,65 L26,84 L46,82 Z" fill="url(#rocketFin)"/>
+  <path d="M74,65 L94,84 L74,82 Z" fill="url(#rocketFin)"/>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="70%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="visorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <filter id="capGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0284c7" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <ellipse cx="60" cy="100" rx="42" ry="10" fill="rgba(0,0,0,0.3)"/>
+  <!-- Cap Crown -->
+  <path d="M28,68 C26,38 42,22 60,22 C78,22 94,38 92,68 Z" fill="url(#capGrad)" filter="url(#capGlow)"/>
+  <!-- Cap Front Panel Seam -->
+  <path d="M60,22 L60,68" stroke="#334155" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <!-- Cap Button on top -->
+  <ellipse cx="60" cy="22" rx="6" ry="3" fill="#38bdf8"/>
+  <!-- TON Logo on Cap -->
+  <path d="M54,42 L66,42 L60,54 Z" fill="#38bdf8"/>
+  <path d="M54,42 L60,34 L66,42 Z" fill="#7dd3fc"/>
+  <!-- Cap Visor -->
+  <path d="M20,68 C20,68 40,88 88,80 C98,78 104,70 104,70 C104,70 82,76 36,66 C28,64 20,68 20,68 Z" fill="url(#visorGrad)"/>
+  <path d="M24,69 C40,77 75,76 96,71" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none"/>
+</svg>

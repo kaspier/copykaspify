@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="pepeSkin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="70%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+    <linearGradient id="crownGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="60" cy="100" rx="38" ry="8" fill="rgba(0,0,0,0.35)"/>
+  <!-- Head -->
+  <path d="M25,65 C25,40 40,35 60,35 C80,35 95,40 95,65 C95,90 80,95 60,95 C40,95 25,90 25,65 Z" fill="url(#pepeSkin)"/>
+  <!-- Big Eyes -->
+  <ellipse cx="44" cy="50" rx="14" ry="12" fill="#ffffff"/>
+  <ellipse cx="76" cy="50" rx="14" ry="12" fill="#ffffff"/>
+  <circle cx="46" cy="50" r="6" fill="#1e293b"/>
+  <circle cx="48" cy="48" r="2.5" fill="#ffffff"/>
+  <circle cx="78" cy="50" r="6" fill="#1e293b"/>
+  <circle cx="80" cy="48" r="2.5" fill="#ffffff"/>
+  <!-- Eyelids -->
+  <path d="M30,46 C34,40 54,40 58,46" stroke="#15803d" stroke-width="3" fill="none"/>
+  <path d="M62,46 C66,40 86,40 90,46" stroke="#15803d" stroke-width="3" fill="none"/>
+  <!-- Frog Mouth -->
+  <path d="M32,74 C45,86 75,86 88,74" stroke="#854d0e" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <ellipse cx="60" cy="80" rx="18" ry="4" fill="#b91c1c" opacity="0.7"/>
+  <!-- Golden Crown -->
+  <polygon points="40,35 46,18 54,26 60,14 66,26 74,18 80,35" fill="url(#crownGrad)"/>
+  <!-- Crown Jewels -->
+  <circle cx="46" cy="22" r="2" fill="#ef4444"/>
+  <circle cx="60" cy="18" r="2.5" fill="#3b82f6"/>
+  <circle cx="74" cy="22" r="2" fill="#ef4444"/>
+</svg>

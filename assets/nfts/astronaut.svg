@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="helmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <linearGradient id="goldVisor" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="40%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="60" cy="104" rx="36" ry="7" fill="rgba(0,0,0,0.3)"/>
+  <!-- Helmet Outer -->
+  <circle cx="60" cy="56" r="38" fill="url(#helmGrad)"/>
+  <!-- Helmet Collar -->
+  <rect x="36" y="86" width="48" height="12" rx="5" fill="#64748b"/>
+  <!-- Gold Visor -->
+  <ellipse cx="60" cy="56" rx="28" ry="22" fill="url(#goldVisor)"/>
+  <!-- Visor Highlight -->
+  <path d="M42,46 C48,40 68,40 76,46" stroke="rgba(255,255,255,0.7)" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

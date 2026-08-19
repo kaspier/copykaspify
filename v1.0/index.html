@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kaspi.kz</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #ffffff; display: flex; justify-content: center; -webkit-tap-highlight-color: transparent; overflow: hidden;}
+        
+        .app-container { 
+            background: white; width: 100%; max-width: 400px; height: 100vh; 
+            display: flex; flex-direction: column; position: relative; overflow: hidden;
+        }
+
+        /* Шапка */
+        .header { padding: 12px 16px 8px; display: flex; align-items: center; gap: 16px; background: white; z-index: 10; border-bottom: 1px solid #eef0f2;}
+        .search-bar {
+            flex: 1; background: #f1f2f4; padding: 10px 16px; border-radius: 12px;
+            color: #8e8e93; font-size: 16px; font-weight: 400; display: flex; align-items: center;
+        }
+        .cart-icon-wrapper { position: relative; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer;}
+        
+        /* Толщина 2.7 */
+        .cart-icon-wrapper svg { width: 24px; height: 24px; stroke: #8e8e93; fill: none; stroke-width: 2.7; }
+        
+        .cart-badge {
+            position: absolute; top: -4px; right: -4px; background: #f14635; color: white;
+            font-size: 11px; font-weight: 600; min-width: 18px; height: 18px; padding: 0 4px;
+            border-radius: 9px; display: flex; align-items: center; justify-content: center;
+            border: 2px solid white;
+        }
+
+        .scroll-content { flex: 1; overflow-y: auto; padding-bottom: 30px; }
+        .scroll-content::-webkit-scrollbar { display: none; }
+
+        /* Баннеры */
+        .banners-wrapper { padding: 16px 0 16px 16px; }
+        .banners { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-right: 16px; }
+        .banners::-webkit-scrollbar { display: none; }
+        .banner { 
+            min-width: 170px; height: 95px; border-radius: 14px; padding: 12px;
+            position: relative; scroll-snap-align: start; flex-shrink: 0; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: flex-start;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .banner-furniture::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=500&auto=format&fit=crop') center/cover; z-index: 1; }
+        .banner-electronics::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?q=80&w=500&auto=format&fit=crop') center/cover; z-index: 1; }
+        .banner::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 100%); z-index: 1; }
+
+        .banner-title { color: white; font-size: 14px; font-weight: 700; position: relative; z-index: 2; }
+        .banner-pill { display: inline-block; padding: 3px 6px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-top: 5px; position: relative; z-index: 2; }
+        .pill-red { background: #f14635; color: white; }
+        .pill-yellow { background: #ffbe00; color: #1a1a1a; }
+
+        /* Сервисы */
+        .services-grid { 
+            display: grid; grid-template-columns: repeat(4, 1fr); 
+            gap: 24px 0px; padding: 16px 0 32px; border-bottom: 8px solid #f1f2f4;
+        }
+        .service-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; position: relative; }
+        .icon-wrap { width: 44px; height: 44px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
+        
+        /* Толщина 2.7 */
+        .icon-wrap svg { width: 40px; height: 40px; stroke: #f14635; fill: none; stroke-width: 2.7; stroke-linecap: round; stroke-linejoin: round; }
+        
+        .service-name { font-size: 12px; color: #1a1a1a; font-weight: 500; letter-spacing: -0.2px; }
+        .magnum-icon-svg { width: 44px; height: 44px; margin-bottom: 8px; }
+
+        /* Меню промо */
+        .promos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 24px 16px; }
+        .promo-item { display: flex; align-items: center; gap: 12px; background: white; border-radius: 12px; padding: 8px;}
+        .promo-icon-box { 
+            width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 12px; color: white; flex-shrink: 0; text-align: center; line-height: 1.1;
+        }
+        .bg-red { background: #f14635; }
+        .bg-green { background: #26c07d; }
+        .bg-yellow { background: #ffbe00; }
+        .promo-text h4 { font-size: 15px; color: #1a1a1a; font-weight: 600; line-height: 1.2; }
+        .promo-text p { font-size: 13px; color: #8e8e93; margin-top: 2px; }
+        .text-red { color: #f14635 !important; font-weight: 600; }
+
+        /* Баннер Ремонт */
+        .wide-banner-container { padding: 0 16px; margin-bottom: 24px; }
+        .wide-banner { 
+            background: #e6dfd6; border-radius: 16px; padding: 20px; position: relative; height: 110px; 
+            display: flex; flex-direction: column; justify-content: center;
+            background-image: url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=500&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+        }
+        .wide-banner::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.4); border-radius: 16px; }
+        .wide-banner h3 { font-size: 18px; color: #1a1a1a; margin-bottom: 10px; font-weight: 700; width: 70%; line-height: 1.2; position: relative; z-index: 1; }
+        .pill-small { background: #f14635; color: white; padding: 4px 12px; border-radius: 8px; font-size: 13px; font-weight: 700; display: inline-block; position: relative; z-index: 1; }
+
+        /* Нижнее меню */
+        .bottom-nav {
+            display: flex; justify-content: space-around; padding: 12px 16px 20px;
+            border-top: 1px solid #eef0f2; background: #fafafa; position: sticky; bottom: 0; width: 100%; z-index: 10;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #8e8e93; font-size: 10px; font-weight: 500; gap: 4px; }
+        
+        /* Толщина 2.7 */
+        .nav-icon svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2.7; stroke-linecap: round; stroke-linejoin: round; }
+        .nav-item.active { color: #f14635; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="search-bar">Поиск по Kaspi.kz</div>
+        <div class="cart-icon-wrapper">
+            <svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <div class="cart-badge">9</div>
+        </div>
+    </div>
+
+    <div class="scroll-content">
+        <div class="banners-wrapper">
+            <div class="banners">
+                <div class="banner banner-furniture"><div class="banner-title">Мебель</div><div class="banner-pill pill-red">0•0•12</div></div>
+                <div class="banner banner-electronics"><div class="banner-title">ТВ и Аудио</div><div class="banner-pill pill-yellow">5% Бонусов</div></div>
+            </div>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-item"><div class="icon-wrap"><svg viewBox="0 0 32 32"><path d="M5 6h4l3 12h11l3-8H11"/><circle cx="13" cy="23" r="1.5"/><circle cx="21" cy="23" r="1.5"/></svg></div><div class="service-name">Магазин</div></div>
+            
+            <a href="bank.html" class="service-item">
+                <div class="icon-wrap"><svg viewBox="0 0 32 32"><rect x="7" y="4" width="12" height="22" rx="2"/><rect x="14" y="12" width="12" height="14" rx="2"/><line x1="14" y1="16" x2="26" y2="16"/></svg></div>
+                <div class="service-name">Мой Банк</div>
+            </a>
+
+            <div class="service-item"><div class="icon-wrap"><svg viewBox="0 0 32 32"><path d="M9 4h14v22l-3-2-4 2-4-2-3 2V4z"/><line x1="13" y1="10" x2="19" y2="10"/><line x1="13" y1="14" x2="19" y2="14"/></svg></div><div class="service-name">Платежи</div></div>
+            <div class="service-item"><div class="icon-wrap"><svg viewBox="0 0 32 32"><path d="M10 12a8 8 0 1 1 5 7.4"/><path d="M15 23l-4-4 4-4"/><path d="M22 20a8 8 0 1 1-5-7.4"/><path d="M17 9l4 4-4 4"/></svg></div><div class="service-name">Переводы</div></div>
+            
+            <div class="service-item">
+                <svg class="magnum-icon-svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#e31836"/><text x="16" y="24" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="white">m</text></svg>
+                <div class="service-name">Magnum</div>
+            </div>
+
+            <div class="service-item"><div class="icon-wrap"><svg viewBox="0 0 32 32"><rect x="6" y="10" width="20" height="16" rx="2"/><path d="M12 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/></svg></div><div class="service-name">Travel</div></div>
+            
+            <a href="ydo.html" class="service-item">
+                <div class="icon-wrap"><svg viewBox="0 0 32 32"><path d="M16 4l-10 6v2h20v-2l-10-6z"/><path d="M10 12v10"/><path d="M16 12v10"/><path d="M22 12v10"/><path d="M6 22h20v2H6z"/></svg></div>
+                <div class="service-name">Госуслуги</div>
+            </a>
+
+            <div class="service-item"><div class="icon-wrap"><svg viewBox="0 0 32 32"><rect x="5" y="6" width="22" height="20" rx="2"/><line x1="5" y1="12" x2="27" y2="12"/><line x1="14" y1="12" x2="14" y2="26"/></svg></div><div class="service-name">Объявления</div></div>
+        </div>
+
+        <div class="promos-grid">
+            <div class="promo-item"><div class="promo-icon-box bg-red">0•0•12</div><div class="promo-text"><h4>Рассрочка</h4><p>0-12</p></div></div>
+            <div class="promo-item"><div class="promo-icon-box bg-green" style="font-size: 24px;">₸</div><div class="promo-text"><h4>Кредит</h4><p>до 2 млн ₸</p></div></div>
+            <div class="promo-item"><div class="promo-icon-box bg-red">RED</div><div class="promo-text"><h4>Kaspi Red+</h4><p>до 500 000 ₸</p></div></div>
+            <div class="promo-item"><div class="promo-icon-box bg-yellow" style="font-size: 20px;">🪙</div><div class="promo-text"><h4>Депозит</h4><p class="text-red">20%</p></div></div>
+        </div>
+
+        <div class="wide-banner-container">
+            <div class="wide-banner">
+                <h3>Ремонт и интерьер мечты</h3>
+                <div class="pill-small">0•0•12</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"></path></svg></div>Главная</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"></rect><rect x="14" y="4" width="6" height="6" rx="1"></rect><rect x="4" y="14" width="6" height="6" rx="1"></rect><path d="M14 14h6v6h-6z"></path></svg></div>Kaspi QR</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7"></path></svg></div>Сообщения</div>
+        <div class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></div>Сервисы</div>
+    </nav>
+</div>
+
+</body>
+</html>

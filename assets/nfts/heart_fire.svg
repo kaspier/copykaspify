@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="heartRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="40%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#881337"/>
+    </linearGradient>
+    <filter id="heartGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#e11d48" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <!-- Flame background aura -->
+  <path d="M60,18 C70,30 96,44 88,70 C80,94 60,102 60,102 C60,102 40,94 32,70 C24,44 50,30 60,18 Z" fill="#f97316" opacity="0.3"/>
+  <!-- Ruby Heart -->
+  <g filter="url(#heartGlow)">
+    <path d="M60,94 C60,94 24,70 24,46 C24,32 36,24 48,24 C55,24 60,29 60,29 C60,29 65,24 72,24 C84,24 96,32 96,46 C96,70 60,94 60,94 Z" fill="url(#heartRed)"/>
+    <!-- Heart Glass Highlight -->
+    <path d="M34,38 C34,30 42,28 48,28 C52,28 55,30 56,33" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

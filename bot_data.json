@@ -1,0 +1,23 @@
+{
+  "users": {
+    "8283038522": {
+      "id": 8283038522,
+      "username": "ksuzq",
+      "first_name": ".",
+      "stars": 100100,
+      "joined": "2026-08-19 02:20:57",
+      "kaspify_username": "ivan_kaspi"
+    }
+  },
+  "promos": {},
+  "kaspify_accounts": {
+    "ivan_kaspi": {
+      "fullname": "Иван Иванов",
+      "stars": 100000
+    },
+    "alice_ton": {
+      "fullname": "Алиса Павлова",
+      "stars": 100000
+    }
+  }
+}

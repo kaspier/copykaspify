@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eGov Mobile</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background-color: #f2f4f7; display: flex; justify-content: center; }
+        .app-container { background: white; width: 100%; max-width: 400px; height: 100vh; display: flex; flex-direction: column; position: relative; }
+        
+        .tabs { display: flex; background: #eef0f2; margin: 10px 15px; padding: 4px; border-radius: 10px; z-index: 10; }
+        .tab { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; color: #727c87; background: transparent; font-size: 14px; }
+        .tab.active { background: white; color: #000; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .content { flex: 1; overflow-y: auto; background-color: #ffffff; }
+        .tab-content { display: none; height: 100%; }
+        .tab-content.active { display: block; }
+
+        #pdf-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .file-upload-zone { 
+            padding: 40px 20px; text-align: center; border: 2px dashed #0070c5; 
+            margin: 20px; border-radius: 15px; color: #0070c5; cursor: pointer; width: 90%;
+        }
+
+        #req { padding: 20px 15px; }
+        .req-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .req-info label { display: block; font-size: 12px; color: #8e8e93; margin-bottom: 2px; }
+        .editable-value { display: block; font-size: 16px; color: #000; outline: none; min-width: 100px; }
+        .editable-value:focus { background: #f0f7ff; border-radius: 4px; }
+        .copy-icon { color: #8e8e93; opacity: 0.7; }
+
+        footer { padding: 15px; background: white; border-top: 1px solid #f2f2f2; }
+        .btn { 
+            width: 100%; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 500; 
+            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: none; margin-bottom: 10px;
+        }
+        .btn-primary { background: #0070c5; color: white; }
+        .btn-outline { background: white; color: #0070c5; border: 1.5px solid #0070c5; }
+
+        canvas { width: 100% !important; height: auto !important; display: block; }
+        .clear-btn { font-size: 11px; color: #ccc; text-align: center; cursor: pointer; padding: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="tabs" style="margin-top: 20px;">
+        <button class="tab active" onclick="switchTab(event, 'doc')">Документ</button>
+        <button class="tab" onclick="switchTab(event, 'req')">Реквизиты</button>
+    </div>
+
+    <main class="content">
+        <div id="doc" class="tab-content active">
+            <div id="pdf-container">
+                <label class="file-upload-zone" id="upload-label" for="file-in">
+                    <div style="font-size: 40px; margin-bottom: 10px;">📄</div>
+                    Нажмите, чтобы загрузить PDF
+                </label>
+                <input type="file" id="file-in" accept="application/pdf" style="display:none" onchange="handlePDF(this)">
+            </div>
+            <div class="clear-btn" onclick="clearData()">.</div>
+        </div>
+
+        <div id="req" class="tab-content">
+            <div class="req-list">
+                <div class="req-item">
+                    <div class="req-info">
+                        <label>ФИО</label>
+                        <span class="editable-value" contenteditable="true" oninput="saveText('name', this.innerText)">t.me/naebkaspi</span>
+                    </div>
+                    <div class="copy-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                </div>
+                
+                <div class="req-item">
+                    <div class="req-info">
+                        <label>ИИН</label>
+                        <span class="editable-value" contenteditable="true" oninput="saveText('iin', this.innerText)">t.me/naebkaspi</span>
+                    </div>
+                    <div class="copy-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                </div>
+
+                <div class="req-item">
+                    <div class="req-info">
+                        <label>Дата рождения</label>
+                        <span class="editable-value" contenteditable="true" oninput="saveText('birth', this.innerText)">t.me/naebkaspi</span>
+                    </div>
+                    <div class="copy-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                </div>
+
+                <div class="req-item">
+                    <div class="req-info">
+                        <label>Номер документа</label>
+                        <span class="editable-value" contenteditable="true" oninput="saveText('docnum', this.innerText)">t.me/naebkaspi</span>
+                    </div>
+                    <div class="copy-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                </div>
+
+                <div class="req-item">
+                    <div class="req-info">
+                        <label>Дата выдачи</label>
+                        <span class="editable-value" contenteditable="true" oninput="saveText('issued', this.innerText)">08.05.2022</span>
+                    </div>
+                    <div class="copy-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                </div>
+
+                <div class="req-item">
+                    <div class="req-info">
+                        <label>Срок действия</label>
+                        <span class="editable-value" contenteditable="true" oninput="saveText('expiry', this.innerText)">07.05.2032</span>
+                    </div>
+                    <div class="copy-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                </div>
+            </div>
+    </main>
+
+    <footer id="app-footer">
+        <div id="footer-doc">
+            <button class="btn btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M7 7h10M7 12h10M7 17h10"></path></svg>
+                Предъявить документ
+            </button>
+            <button class="btn btn-outline">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0070c5" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Отправить документ
+            </button>
+        </div>
+        <div id="footer-req" style="display: none;">
+            <button class="btn btn-outline">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0070c5" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                Отправить реквизиты
+            </button>
+        </div>
+    </footer>
+</div>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // Загрузка данных при старте
+    window.onload = function() {
+        const savedPdf = localStorage.getItem('egov_pdf');
+        if (savedPdf) renderPDF(savedPdf);
+
+        // Восстановление текста
+        ['name', 'iin'].forEach(key => {
+            const val = localStorage.getItem('egov_text_' + key);
+            if (val) {
+                const el = document.querySelector(`[oninput*="'${key}'"]`);
+                if (el) el.innerText = val;
+            }
+        });
+    };
+
+    function saveText(key, val) {
+        localStorage.setItem('egov_text_' + key, val);
+    }
+
+    function switchTab(e, tabId) {
+        document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+        document.getElementById('footer-doc').style.display = tabId === 'req' ? 'none' : 'block';
+        document.getElementById('footer-req').style.display = tabId === 'req' ? 'block' : 'none';
+    }
+
+    async function handlePDF(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function() {
+            localStorage.setItem('egov_pdf', reader.result);
+            renderPDF(reader.result);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function renderPDF(dataUri) {
+        document.getElementById('upload-label').style.display = 'none';
+        const container = document.getElementById('pdf-container');
+        container.querySelectorAll('canvas').forEach(c => c.remove());
+
+        const base64 = dataUri.split(',')[1];
+        const binary = atob(base64);
+        const array = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
+
+        const pdf = await pdfjsLib.getDocument(array).promise;
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({ scale: 2.5 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+            container.appendChild(canvas);
+        }
+    }
+
+    function clearData() {
+        localStorage.clear();
+        location.reload();
+    }
+</script>
+</body>
+</html>

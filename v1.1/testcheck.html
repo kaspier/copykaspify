@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Фискальный чек</title>
+
+<style>
+:root {
+    --bg-color: #111111;
+    --receipt-bg: #ffffff;
+    --kaspi-green: #73C343;
+    --kaspi-red: #E60012;
+    --text-main: #1c1c1c;
+    --text-muted: #9e9e9e;
+    --line-color: #ededed;
+}
+
+body {
+    margin: 0;
+    background: var(--bg-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.phone-screen {
+    width: 100%;
+    max-width: 430px;
+}
+
+/* Верхняя панель */
+.top-bar {
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 22px;
+}
+
+/* Контейнер чека */
+.receipt-container {
+    padding: 0 16px 40px;
+}
+
+/* Верхний зубчатый край */
+.receipt-top {
+    background: var(--receipt-bg);
+    height: 14px;
+    mask-image: radial-gradient(circle at 7px -6px, transparent 8px, white 9px);
+    mask-size: 14px 14px;
+    -webkit-mask-image: radial-gradient(circle at 7px -6px, transparent 8px, white 9px);
+    -webkit-mask-size: 14px 14px;
+}
+
+/* Основное тело */
+.receipt-body {
+    background: var(--receipt-bg);
+}
+
+/* Нижний зубчатый край */
+.receipt-bottom {
+    background: var(--receipt-bg);
+    height: 12px;
+    clip-path: polygon(
+        0 0, 100% 0,
+        100% 0, 98% 100%, 96% 0, 94% 100%, 92% 0, 90% 100%,
+        88% 0, 86% 100%, 84% 0, 82% 100%, 80% 0, 78% 100%,
+        76% 0, 74% 100%, 72% 0, 70% 100%, 68% 0, 66% 100%,
+        64% 0, 62% 100%, 60% 0, 58% 100%, 56% 0, 54% 100%,
+        52% 0, 50% 100%, 48% 0, 46% 100%, 44% 0, 42% 100%,
+        40% 0, 38% 100%, 36% 0, 34% 100%, 32% 0, 30% 100%,
+        28% 0, 26% 100%, 24% 0, 22% 100%, 20% 0, 18% 100%,
+        16% 0, 14% 100%, 12% 0, 10% 100%, 8% 0, 6% 100%,
+        4% 0, 2% 100%, 0 0
+    );
+}
+
+/* Заголовок */
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 22px 20px 18px;
+    text-align: left;
+}
+
+.logo-circle {
+    width: 80px;
+    height: 80px;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Kaspi.kz_logo.svg/120px-Kaspi.kz_logo.svg.png');
+    background-size: contain;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+/* Разделитель */
+.divider {
+    height: 1px;
+    background: var(--line-color);
+    width: 100%;
+}
+
+/* Блок продавца */
+.vendor-info {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+}
+
+.vendor-icon {
+    width: 38px;
+    height: 38px;
+    background: var(--kaspi-green);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-right: 14px;
+}
+
+.vendor-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.vendor-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Зеленый блок */
+.status-banner {
+    background: var(--kaspi-green);
+    color: white;
+    padding: 12px 20px 16px;
+}
+
+.status-text {
+    font-size: 13px;
+    opacity: 0.95;
+}
+
+.amount {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+/* Продажа */
+.sale-block {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line-color);
+}
+
+.sale-title {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.sale-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.sale-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Таблица */
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 11px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--line-color);
+}
+
+.data-label {
+    color: var(--text-muted);
+    flex: 1;
+    font-size: 12px;
+}
+
+.data-value {
+    text-align: right;
+    flex: 1.4;
+    color: var(--text-main);
+}
+
+/* QR */
+.qr-section {
+    padding: 24px 20px 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.qr-img {
+    width: 190px;
+    height: 190px;
+    background-image: url('https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=https://kaspi.kz');
+    background-size: cover;
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone-screen">
+
+<div class="top-bar">
+<span>✕</span>
+<span>🔗</span>
+</div>
+
+<div class="receipt-container">
+<div class="receipt-top"></div>
+
+<div class="receipt-body">
+
+<div class="header">
+<div class="logo-circle"></div>
+<h1>Фискальный чек</h1>
+</div>
+
+<div class="divider"></div>
+
+<div class="vendor-info">
+<div class="vendor-icon">И</div>
+<div>
+<div class="vendor-name">Столовая Гимназия 45</div>
+<div class="vendor-sub">ИП Кузнецова В.О.</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="status-banner">
+<div class="status-text">Платеж успешно совершен</div>
+<div class="amount">150 ₸</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="sale-block">
+<div class="sale-title">Продажа</div>
+<div class="sale-row">
+<span>Горячее питание</span>
+<span>150 ₸</span>
+</div>
+<div class="sale-sub">1 шт. × 150 ₸</div>
+</div>
+
+<div class="data-row"><div class="data-label">№ чека</div><div class="data-value">QR14350391556</div></div>
+<div class="data-row"><div class="data-label">Дата и время по Астане</div><div class="data-value">23.02.2026 11:58</div></div>
+<div class="data-row"><div class="data-label">Оплачено</div><div class="data-value">с Kaspi Gold</div></div>
+<div class="data-row"><div class="data-label">Адрес</div><div class="data-value">г. Караганда, Бухар-Жырау, 72а</div></div>
+<div class="data-row"><div class="data-label">ИИН/БИН продавца</div><div class="data-value">930429450237</div></div>
+<div class="data-row"><div class="data-label">ФИО покупателя</div><div class="data-value">Эмиль К.</div></div>
+<div class="data-row"><div class="data-label">РНМ</div><div class="data-value">010103856836</div></div>
+<div class="data-row"><div class="data-label">ЗНМ</div><div class="data-value">KK1864727091</div></div>
+<div class="data-row"><div class="data-label">ФП</div><div class="data-value">316403652215</div></div>
+<div class="data-row" style="border:none;"><div class="data-label">ОФД</div><div class="data-value">Kaspi ОФД</div></div>
+
+<div class="qr-section">
+<div class="qr-img"></div>
+</div>
+
+</div>
+
+<div class="receipt-bottom"></div>
+</div>
+
+</div>
+
+</body>
+</html>

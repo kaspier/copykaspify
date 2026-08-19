@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="duckSkin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <linearGradient id="cyberVisor" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="60" cy="102" rx="38" ry="8" fill="rgba(0,0,0,0.3)"/>
+  <!-- Duck Body -->
+  <path d="M30,70 C30,55 45,55 58,55 C70,55 92,60 92,78 C92,94 75,98 55,98 C35,98 30,85 30,70 Z" fill="url(#duckSkin)"/>
+  <!-- Duck Tail -->
+  <path d="M28,68 C18,60 22,50 34,58 Z" fill="#ca8a04"/>
+  <!-- Duck Head -->
+  <circle cx="68" cy="42" r="22" fill="url(#duckSkin)"/>
+  <!-- Duck Beak -->
+  <path d="M84,40 C98,42 102,50 86,54 Z" fill="#ea580c"/>
+  <!-- Cyber Visor Glasses -->
+  <path d="M52,36 L86,36 C90,36 92,46 86,48 L54,48 C48,46 48,36 52,36 Z" fill="url(#cyberVisor)"/>
+  <line x1="55" y1="42" x2="83" y2="42" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Cyber Headband -->
+  <path d="M48,34 C58,26 78,26 88,34" stroke="#06b6d4" stroke-width="3" fill="none"/>
+</svg>
