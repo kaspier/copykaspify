@@ -24,9 +24,22 @@ window.KaspifyCloud = (function() {
         return cachedDB;
       }
     } catch (e) {
-      console.warn('[CloudSync] Fetch DB error:', e.message);
+      console.warn('[CloudSync] Network offline / error:', e.message);
     }
-    return cachedDB || { users: [], posts: [], p2p: [], usernames: [], online: {} };
+    if (!cachedDB) {
+      try {
+        cachedDB = {
+          users: JSON.parse(localStorage.getItem('kaspi_users_db') || '[]'),
+          posts: JSON.parse(localStorage.getItem('kaspi_kaspify_posts') || '[]'),
+          p2p: JSON.parse(localStorage.getItem('kaspi_p2p_market') || '[]'),
+          usernames: JSON.parse(localStorage.getItem('kaspi_usernames_market') || '[]'),
+          online: {}
+        };
+      } catch(err) {
+        cachedDB = { users: [], posts: [], p2p: [], usernames: [], online: {} };
+      }
+    }
+    return cachedDB;
   }
 
   // === ОТПРАВКА СИНХРОНИЗАЦИОННОГО СООБЩЕНИЯ В БОТ ===

@@ -6,7 +6,7 @@
 window.KaspifyDB = (function() {
   const API_BASE = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
       ? 'http://localhost:8888/api' 
-      : 'https://lovely-baboon-66.loca.lt/api';
+      : (window.KASPIFY_API_URL || '/api');
   const STORAGE_KEY_USERS = 'kaspi_users_db';
   const STORAGE_KEY_ACTIVE = 'kaspi_active_username';
   const STORAGE_KEY_AUTH = 'kaspi_is_authenticated';

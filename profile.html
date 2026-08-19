@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="cloud_sync.js"></script>
+    <script src="auth.js"></script>
     <style>
         :root {
             --tg-bg: #0e1621;
@@ -4049,6 +4051,39 @@
     });
 
     function initUsersDatabase() {
+        if (!localStorage.getItem('kaspi_users_db') || JSON.parse(localStorage.getItem('kaspi_users_db') || '[]').length === 0) {
+            const initialUsers = [
+                {
+                    id: "user_patexr",
+                    username: "patexr",
+                    fullname: "patexr",
+                    stars: 10000,
+                    balance: 250000,
+                    verified: true,
+                    avatar: "checklogo.png",
+                    bio: "Kaspify Creator & Founder ✨",
+                    nfts: [],
+                    ownedUsernames: ["patexr"]
+                },
+                {
+                    id: "user_ksuzq",
+                    username: "ksuzq",
+                    fullname: "ksuzq",
+                    stars: 500,
+                    balance: 50000,
+                    verified: false,
+                    avatar: "checklogo.png",
+                    bio: "Kaspify User",
+                    nfts: [],
+                    ownedUsernames: []
+                }
+            ];
+            localStorage.setItem('kaspi_users_db', JSON.stringify(initialUsers));
+            if (!localStorage.getItem('kaspi_active_username')) {
+                localStorage.setItem('kaspi_active_username', 'patexr');
+            }
+        }
+
         if (!localStorage.getItem('kaspi_kaspify_posts') || JSON.parse(localStorage.getItem('kaspi_kaspify_posts') || '[]').length === 0) {
             const initialPosts = [
                 {
@@ -4140,9 +4175,23 @@
             }
         }
 
-        if (!currentUser && window.KaspifyDB) {
-            window.KaspifyDB.openAuthModal(true);
-            return;
+        if (!currentUser) {
+            currentUser = {
+                id: 'user_' + Date.now(),
+                username: 'patexr',
+                fullname: 'patexr',
+                stars: 10000,
+                balance: 250000,
+                verified: true,
+                avatar: 'checklogo.png',
+                bio: 'Kaspify User ✨',
+                nfts: [],
+                ownedUsernames: ['patexr']
+            };
+            const users = getAllUsers();
+            users.push(currentUser);
+            saveAllUsers(users);
+            localStorage.setItem('kaspi_active_username', 'patexr');
         }
 
         updateUI();
@@ -4150,7 +4199,7 @@
         // Живая синхронизация с сервером бота (Stars, галочка верификации и статус онлайн)
         if (currentUser && currentUser.username) {
             syncWithServer();
-            setInterval(syncWithServer, 3000);
+            setInterval(syncWithServer, 5000);
         }
     }
 
@@ -4978,10 +5027,6 @@
         gift.onSale = true;
         gift.salePrice = price;
         gift.seller = currentUser.username;
-        gift.sellerName = currentUser.fullname;
-
-        const p2p = getP2pMarket();
-        p2p.push({
         const listedItem = {
             ...gift,
             listedAt: Date.now()
@@ -5501,7 +5546,5 @@
         );
     }
 </script>
-<script src="cloud_sync.js"></script>
-<script src="auth.js"></script>
 </body>
 </html>
