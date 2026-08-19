@@ -9,3 +9,4 @@ services:
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         value: 8745809636:AAHG-CU-SIlM1otpXPv5b21Lu11YUacabuY
+        # redeploy

@@ -543,6 +543,7 @@
             -webkit-backdrop-filter: blur(8px);
             color: #fff;
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 2;
         }
 
         .rarity-mythic { background: linear-gradient(135deg, rgba(239, 68, 68, 0.85), rgba(185, 28, 28, 0.95)); border: 1px solid rgba(239, 68, 68, 0.5); }
@@ -556,12 +557,34 @@
             right: 10px;
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             color: var(--tg-text-secondary);
             font-size: 10px;
             font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 6px;
+            padding: 3px 8px;
+            border-radius: 8px;
             border: 1px solid var(--tg-border-light);
+            z-index: 2;
+        }
+
+        .nft-supply-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(245, 158, 11, 0.18);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            z-index: 2;
         }
 
         .nft-card-body {
@@ -4718,9 +4741,9 @@
 
         container.innerHTML = items.map(gift => `
             <div class="nft-card" onclick="openBuyNftModal('${gift.id}')">
-                <div class="nft-backdrop" style="background: radial-gradient(circle at 50% 35%, var(--tg-surface-elevated) 0%, var(--tg-surface) 60%, var(--tg-bg) 100%); position: relative;">
+                <div class="nft-backdrop" style="background: radial-gradient(circle at 50% 35%, var(--tg-surface-elevated) 0%, var(--tg-surface) 60%, var(--tg-bg) 100%);">
                     <span class="nft-rarity-pill rarity-${gift.rarity}">${rarityRu(gift.rarity)}</span>
-                    <span class="nft-serial-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 8px; position: absolute; bottom: 8px; right: 8px;">🔥 1 из ${gift.supply || '500'}</span>
+                    <span class="nft-supply-badge" style="top: auto; bottom: 8px;">🔥 1 из ${gift.supply || '500'}</span>
                     <img src="${gift.img}" alt="${gift.name}" class="nft-model-img" onerror="this.style.opacity='0.4'">
                 </div>
                 <div class="nft-card-body">
