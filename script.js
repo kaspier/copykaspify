@@ -601,30 +601,7 @@ function initSwipeBack() {
 }
 
 // ===== MULTI-USER ACCOUNTS & REGISTRATION SYSTEM =====
-const DEFAULT_USERS = [
-    {
-        id: 'user_1',
-        fullname: 'Иван Кузнецов',
-        username: 'naebkaspi',
-        pin: '1488',
-        bio: 'Пользуюсь Kaspi Gold ✨ Официальный аккаунт',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-        banner: 'linear-gradient(135deg, #1e293b, #334155, #f14635)',
-        txCount: 14,
-        createdAt: Date.now() - 86400000 * 30
-    },
-    {
-        id: 'user_2',
-        fullname: 'Алихан Смагулов',
-        username: 'alikhan_kz',
-        pin: '0000',
-        bio: 'Люблю переводы без комиссий 🚀',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
-        banner: 'linear-gradient(135deg, #0f172a, #1e3a8a, #3b82f6)',
-        txCount: 6,
-        createdAt: Date.now() - 86400000 * 10
-    }
-];
+const DEFAULT_USERS = [];
 
 function getAllUsers() {
     try {
@@ -944,14 +921,6 @@ function shareProfile() {
 
 // ===== PROFILE WALL (РОСПИСИ НА СТЕНЕ) =====
 const SAMPLE_WALL_POSTS = [
-    {
-        id: 'post_1',
-        authorName: 'Алихан Смагулов',
-        authorUsername: 'alikhan_kz',
-        authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
-        text: 'Распишусь тут! Отличных переводов и покупок 🔥🤝',
-        timestamp: Date.now() - 3600000 * 2
-    },
     {
         id: 'post_2',
         authorName: 'Диана К.',
