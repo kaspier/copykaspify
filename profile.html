@@ -4049,16 +4049,71 @@
     });
 
     function initUsersDatabase() {
-        if (!localStorage.getItem('kaspi_kaspify_posts')) {
-            localStorage.setItem('kaspi_kaspify_posts', JSON.stringify([]));
+        if (!localStorage.getItem('kaspi_kaspify_posts') || JSON.parse(localStorage.getItem('kaspi_kaspify_posts') || '[]').length === 0) {
+            const initialPosts = [
+                {
+                    id: "post_welcome_1",
+                    authorId: "kaspify",
+                    authorName: "Kaspify Team",
+                    authorUsername: "kaspify",
+                    authorAvatar: "checklogo.png",
+                    authorVerified: true,
+                    text: "Добро пожаловать в Kaspify Social Network! 🎉 Покупайте лимитированные NFT подарки (12 000 уникальных комбинаций), коллекционируйте редкие юзернеймы Telegram и делитесь публикациями со всем сообществом.",
+                    media: null,
+                    likes: ["patexr", "ksuzq"],
+                    reposts: 0,
+                    tipsStars: 100,
+                    createdAt: Date.now() - 3600000
+                }
+            ];
+            localStorage.setItem('kaspi_kaspify_posts', JSON.stringify(initialPosts));
         }
 
-        if (!localStorage.getItem('kaspi_p2p_market')) {
-            localStorage.setItem('kaspi_p2p_market', JSON.stringify([]));
+        if (!localStorage.getItem('kaspi_p2p_market') || JSON.parse(localStorage.getItem('kaspi_p2p_market') || '[]').length === 0) {
+            const initialP2P = [
+                {
+                    id: "P2P-101",
+                    name: "Eternal Rose",
+                    img: "assets/nfts/eternal_rose.webp",
+                    rarity: "mythic",
+                    upgraded: true,
+                    variation: "Ruby Gold Edition",
+                    serial: "#0007",
+                    salePrice: 1200,
+                    seller: "patexr",
+                    backdrop: "radial-gradient(circle at 50% 35%, #881337 0%, #4c0519 100%)",
+                    listedAt: Date.now()
+                },
+                {
+                    id: "P2P-102",
+                    name: "Diamond Ring",
+                    img: "assets/nfts/diamond_ring.webp",
+                    rarity: "legendary",
+                    upgraded: true,
+                    variation: "Cyan Crystal",
+                    serial: "#0042",
+                    salePrice: 850,
+                    seller: "ksuzq",
+                    backdrop: "radial-gradient(circle at 50% 35%, #0e7490 0%, #164e63 100%)",
+                    listedAt: Date.now()
+                }
+            ];
+            localStorage.setItem('kaspi_p2p_market', JSON.stringify(initialP2P));
         }
 
-        if (!localStorage.getItem('kaspi_usernames_market')) {
-            localStorage.setItem('kaspi_usernames_market', JSON.stringify([]));
+        if (!localStorage.getItem('kaspi_usernames_market') || JSON.parse(localStorage.getItem('kaspi_usernames_market') || '[]').length === 0) {
+            const initialUsernames = [
+                { handle: 'ton', priceStars: 5000, seller: 'system', listedAt: Date.now() },
+                { handle: 'vip', priceStars: 2500, seller: 'system', listedAt: Date.now() },
+                { handle: 'boss', priceStars: 1500, seller: 'system', listedAt: Date.now() },
+                { handle: 'casino', priceStars: 1200, seller: 'system', listedAt: Date.now() },
+                { handle: 'crypto', priceStars: 1000, seller: 'system', listedAt: Date.now() },
+                { handle: 'gold', priceStars: 800, seller: 'system', listedAt: Date.now() },
+                { handle: 'legend', priceStars: 600, seller: 'system', listedAt: Date.now() },
+                { handle: 'meta', priceStars: 500, seller: 'system', listedAt: Date.now() },
+                { handle: 'star', priceStars: 350, seller: 'system', listedAt: Date.now() }
+            ];
+            localStorage.setItem('kaspi_usernames_market', JSON.stringify(initialUsernames));
         }
     }
 
@@ -4389,7 +4444,11 @@
                                 ${escapeHTML(post.authorName)}
                                 ${post.authorVerified ? '<svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' : ''}
                             </div>
-                            <div class="post-author-handle">@${escapeHTML(post.authorUsername)} • ${timeAgo}</div>
+                            <div class="post-author-handle" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                                <span>@${escapeHTML(post.authorUsername)}</span>
+                                <span style="font-size: 10px; font-weight: 800; color: #38bdf8; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 1px 5px;">🏷️ NFT</span>
+                                <span>• ${timeAgo}</span>
+                            </div>
                         </div>
                     </div>
                     ${currentUser && post.authorUsername === currentUser.username ? `
@@ -4531,13 +4590,14 @@
 
         container.innerHTML = items.map(gift => `
             <div class="nft-card" onclick="openBuyNftModal('${gift.id}')">
-                <div class="nft-backdrop" style="background: radial-gradient(circle at 50% 35%, var(--tg-surface-elevated) 0%, var(--tg-surface) 60%, var(--tg-bg) 100%);">
+                <div class="nft-backdrop" style="background: radial-gradient(circle at 50% 35%, var(--tg-surface-elevated) 0%, var(--tg-surface) 60%, var(--tg-bg) 100%); position: relative;">
                     <span class="nft-rarity-pill rarity-${gift.rarity}">${rarityRu(gift.rarity)}</span>
+                    <span class="nft-serial-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 8px; position: absolute; bottom: 8px; right: 8px;">🔥 1 из ${gift.supply || '500'}</span>
                     <img src="${gift.img}" alt="${gift.name}" class="nft-model-img" onerror="this.style.opacity='0.4'">
                 </div>
                 <div class="nft-card-body">
                     <div class="nft-title">${gift.name}</div>
-                    <div class="nft-variation-tag" style="color: var(--tg-text-secondary);">Подарок ${gift.serial}</div>
+                    <div class="nft-variation-tag" style="color: var(--tg-text-secondary); font-size: 11px;">Лимитированный тираж ${gift.serial || '#0001'}</div>
                     <div class="nft-price-row">
                         <span class="nft-price-stars">${gift.priceStars} Stars</span>
                     </div>
