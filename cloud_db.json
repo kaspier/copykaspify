@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "username": "patexr",
+      "fullname": "patexr",
+      "stars": 10000000,
+      "balance": 10000,
+      "verified": false,
+      "avatar": "checklogo.png",
+      "bio": "Kaspify ID"
+    },
+    {
+      "username": "ksuzq",
+      "fullname": "ksuzq",
+      "stars": 500,
+      "balance": 10000,
+      "verified": false,
+      "avatar": "checklogo.png",
+      "bio": "Kaspify ID"
+    }
+  ],
+  "posts": [],
+  "online": {}
+}
