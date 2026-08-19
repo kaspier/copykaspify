@@ -784,6 +784,30 @@ const server = http.createServer((req, res) => {
       try { body = JSON.parse(bodyData); } catch (e) { }
     }
 
+    // --- ОБСЛУЖИВАНИЕ СТАТИЧЕСКОГО САЙТА (HTML, CSS, JS, ASSETS) ---
+    const cleanUrl = (req.url || '/').split('?')[0];
+    if (!cleanUrl.startsWith('/api')) {
+      let relPath = cleanUrl === '/' ? 'index.html' : cleanUrl.substring(1);
+      const safePath = path.join(__dirname, relPath);
+      if (fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
+        const ext = path.extname(safePath).toLowerCase();
+        const mimeTypes = {
+          '.html': 'text/html; charset=utf-8',
+          '.css': 'text/css; charset=utf-8',
+          '.js': 'application/javascript; charset=utf-8',
+          '.json': 'application/json; charset=utf-8',
+          '.png': 'image/png',
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.webp': 'image/webp',
+          '.svg': 'image/svg+xml'
+        };
+        const contentType = mimeTypes[ext] || 'application/octet-stream';
+        res.writeHead(200, { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*' });
+        return fs.createReadStream(safePath).pipe(res);
+      }
+    }
+
     res.setHeader('Content-Type', 'application/json');
 
     if (req.url === '/api/send-otp' && req.method === 'POST') {
@@ -975,8 +999,9 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(8888, () => {
-  console.log('🚀 Локальный API сервер Kaspify запущен на http://localhost:8888');
-  console.log(`🤖 Kaspify Telegram Bot активен с НАСТОЯЩИМИ Telegram Stars (Админ ID: ${ADMIN_ID})`);
+const PORT = process.env.PORT || 8888;
+server.listen(PORT, () => {
+  console.log(`🚀 Fullstack Kaspify Server & API active on port ${PORT}`);
+  console.log(`🤖 Kaspify Telegram Bot active 24/7 (Admin ID: ${ADMIN_ID})`);
   pollTelegram();
 });
