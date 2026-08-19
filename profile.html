@@ -4051,37 +4051,8 @@
     });
 
     function initUsersDatabase() {
-        if (!localStorage.getItem('kaspi_users_db') || JSON.parse(localStorage.getItem('kaspi_users_db') || '[]').length === 0) {
-            const initialUsers = [
-                {
-                    id: "user_patexr",
-                    username: "patexr",
-                    fullname: "patexr",
-                    stars: 10000,
-                    balance: 250000,
-                    verified: true,
-                    avatar: "checklogo.png",
-                    bio: "Kaspify Creator & Founder ✨",
-                    nfts: [],
-                    ownedUsernames: ["patexr"]
-                },
-                {
-                    id: "user_ksuzq",
-                    username: "ksuzq",
-                    fullname: "ksuzq",
-                    stars: 500,
-                    balance: 50000,
-                    verified: false,
-                    avatar: "checklogo.png",
-                    bio: "Kaspify User",
-                    nfts: [],
-                    ownedUsernames: []
-                }
-            ];
-            localStorage.setItem('kaspi_users_db', JSON.stringify(initialUsers));
-            if (!localStorage.getItem('kaspi_active_username')) {
-                localStorage.setItem('kaspi_active_username', 'patexr');
-            }
+        if (!localStorage.getItem('kaspi_users_db')) {
+            localStorage.setItem('kaspi_users_db', JSON.stringify([]));
         }
 
         if (!localStorage.getItem('kaspi_kaspify_posts') || JSON.parse(localStorage.getItem('kaspi_kaspify_posts') || '[]').length === 0) {
@@ -4095,7 +4066,7 @@
                     authorVerified: true,
                     text: "Добро пожаловать в Kaspify Social Network! 🎉 Покупайте лимитированные NFT подарки (12 000 уникальных комбинаций), коллекционируйте редкие юзернеймы Telegram и делитесь публикациями со всем сообществом.",
                     media: null,
-                    likes: ["patexr", "ksuzq"],
+                    likes: [],
                     reposts: 0,
                     tipsStars: 100,
                     createdAt: Date.now() - 3600000
@@ -4115,7 +4086,7 @@
                     variation: "Ruby Gold Edition",
                     serial: "#0007",
                     salePrice: 1200,
-                    seller: "patexr",
+                    seller: "system",
                     backdrop: "radial-gradient(circle at 50% 35%, #881337 0%, #4c0519 100%)",
                     listedAt: Date.now()
                 },
@@ -4128,7 +4099,7 @@
                     variation: "Cyan Crystal",
                     serial: "#0042",
                     salePrice: 850,
-                    seller: "ksuzq",
+                    seller: "system",
                     backdrop: "radial-gradient(circle at 50% 35%, #0e7490 0%, #164e63 100%)",
                     listedAt: Date.now()
                 }
@@ -4178,20 +4149,20 @@
         if (!currentUser) {
             currentUser = {
                 id: 'user_' + Date.now(),
-                username: 'patexr',
-                fullname: 'patexr',
-                stars: 10000,
+                username: 'user',
+                fullname: 'Пользователь Kaspify',
+                stars: 100,
                 balance: 250000,
-                verified: true,
+                verified: false,
                 avatar: 'checklogo.png',
-                bio: 'Kaspify User ✨',
+                bio: 'Официальный аккаунт Kaspify ✨',
                 nfts: [],
-                ownedUsernames: ['patexr']
+                ownedUsernames: []
             };
             const users = getAllUsers();
             users.push(currentUser);
             saveAllUsers(users);
-            localStorage.setItem('kaspi_active_username', 'patexr');
+            localStorage.setItem('kaspi_active_username', 'user');
         }
 
         updateUI();
