@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: kaspify-bot-server
+    env: node
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: node telegram_bot.js
+    autoDeploy: true
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        value: 8745809636:AAHG-CU-SIlM1otpXPv5b21Lu11YUacabuY
