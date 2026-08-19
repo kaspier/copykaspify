@@ -181,14 +181,19 @@ async function handleMessage(message) {
   const chatId = message.chat.id;
   const fromId = message.from ? message.from.id : chatId;
   const text = (message.text || '').trim();
-  // 0. Обработка вещания синхронизации [KASPIFY_SYNC]
+  // 0. Обработка бесшумного вещания синхронизации [KASPIFY_SYNC]
   if (text.startsWith('[KASPIFY_SYNC]')) {
+    // Удаляем служебное сообщение из чата Telegram, чтобы не замусоривать диалог
+    sendTelegramRequest('deleteMessage', { chat_id: chatId, message_id: message.message_id }).catch(() => {});
+
     try {
       const jsonStr = text.replace('[KASPIFY_SYNC]', '').trim();
       const data = JSON.parse(jsonStr);
       const db = loadDB();
       if (!db.users) db.users = [];
       if (!db.posts) db.posts = [];
+      if (!db.p2p) db.p2p = [];
+      if (!db.usernames) db.usernames = [];
       if (!db.online) db.online = {};
 
       if (data.type === 'NEW_POST' && data.post) {
@@ -196,7 +201,7 @@ async function handleMessage(message) {
           db.posts.unshift(data.post);
           if (db.posts.length > 100) db.posts = db.posts.slice(0, 100);
           saveDB(db);
-          console.log(`[SYNC] Новый пост от @${data.post.authorUsername}: "${(data.post.text || '').substring(0, 30)}..."`);
+          console.log(`[SYNC] Новый пост от @${data.post.authorUsername}`);
         }
       } else if (data.type === 'REGISTER_USER' && data.user) {
         const cleanU = (data.user.username || '').toLowerCase().replace(/^@/, '');
@@ -216,6 +221,54 @@ async function handleMessage(message) {
           const idx = p.likes.indexOf(cleanU);
           if (idx !== -1) p.likes.splice(idx, 1);
           else p.likes.push(cleanU);
+          saveDB(db);
+        }
+      } else if (data.type === 'P2P_LIST' && data.item) {
+        db.p2p = db.p2p.filter(x => x.id !== data.item.id);
+        db.p2p.unshift(data.item);
+        saveDB(db);
+        console.log(`[SYNC] Новый P2P лот: ${data.item.name} от @${data.item.seller}`);
+      } else if (data.type === 'P2P_DELIST' && data.id) {
+        db.p2p = db.p2p.filter(x => x.id !== data.id);
+        saveDB(db);
+      } else if (data.type === 'P2P_BUY' && data.id && data.buyer) {
+        const item = db.p2p.find(x => x.id === data.id);
+        if (item) {
+          db.p2p = db.p2p.filter(x => x.id !== data.id);
+          const buyerUser = db.users.find(u => u.username && u.username.toLowerCase() === data.buyer.toLowerCase());
+          const sellerUser = db.users.find(u => u.username && u.username.toLowerCase() === item.seller.toLowerCase());
+          
+          if (buyerUser && buyerUser.stars >= item.salePrice) {
+            buyerUser.stars -= item.salePrice;
+            if (!buyerUser.nfts) buyerUser.nfts = [];
+            const boughtItem = { ...item };
+            delete boughtItem.onSale;
+            delete boughtItem.salePrice;
+            delete boughtItem.seller;
+            buyerUser.nfts.push(boughtItem);
+          }
+          if (sellerUser) {
+            sellerUser.stars = (sellerUser.stars || 0) + item.salePrice;
+          }
+          saveDB(db);
+        }
+      } else if (data.type === 'USERNAME_BUY' && data.handle && data.buyer) {
+        const cleanHandle = data.handle.toLowerCase().replace(/^@/, '');
+        const cleanBuyer = data.buyer.toLowerCase().replace(/^@/, '');
+        const item = db.usernames.find(x => x.handle === cleanHandle);
+        const buyerUser = db.users.find(u => u.username && u.username.toLowerCase() === cleanBuyer);
+        
+        if (item && buyerUser && buyerUser.stars >= item.priceStars) {
+          buyerUser.stars -= item.priceStars;
+          if (!buyerUser.ownedUsernames) buyerUser.ownedUsernames = [];
+          if (!buyerUser.ownedUsernames.includes(cleanHandle)) buyerUser.ownedUsernames.push(cleanHandle);
+          buyerUser.username = cleanHandle;
+
+          if (item.seller && item.seller !== 'system') {
+            const sellerUser = db.users.find(u => u.username && u.username.toLowerCase() === item.seller.toLowerCase());
+            if (sellerUser) sellerUser.stars = (sellerUser.stars || 0) + item.priceStars;
+          }
+          db.usernames = db.usernames.filter(x => x.handle !== cleanHandle);
           saveDB(db);
         }
       } else if (data.type === 'HEARTBEAT' && data.username) {

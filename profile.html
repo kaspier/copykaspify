@@ -4318,28 +4318,55 @@
     }
 
     async function syncUserWithCloud() {
-        if (!currentUser || !window.KaspifyCloud) return;
+        if (!window.KaspifyCloud) return;
         try {
-            // Heartbeat online
-            await KaspifyCloud.heartbeat(currentUser.username);
+            if (currentUser && currentUser.username) {
+                await KaspifyCloud.heartbeat(currentUser.username);
+            }
 
-            // Sync user data (stars, verified badge)
-            const cloudUser = await KaspifyCloud.getUser(currentUser.username);
-            if (cloudUser) {
-                let updated = false;
-                if (cloudUser.stars !== undefined && cloudUser.stars !== currentUser.stars) {
-                    currentUser.stars = cloudUser.stars;
-                    updated = true;
+            const db = await KaspifyCloud.fetchDB();
+            if (db) {
+                // 1. Синхронизируем посты
+                if (db.posts && Array.isArray(db.posts)) {
+                    const localPosts = getPosts();
+                    const postMap = new Map();
+                    (localPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+                    (db.posts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+                    const merged = Array.from(postMap.values());
+                    merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    savePosts(merged);
+                    renderPostsFeed();
                 }
-                if (cloudUser.verified !== undefined && cloudUser.verified !== currentUser.verified) {
-                    currentUser.verified = cloudUser.verified;
-                    updated = true;
+
+                // 2. Синхронизируем P2P маркет
+                if (db.p2p && Array.isArray(db.p2p) && db.p2p.length > 0) {
+                    saveP2pMarket(db.p2p);
+                    renderP2pMarketGrid();
                 }
-                if (updated) {
-                    saveCurrentUser();
-                    updateUI();
-                    if (window.KaspifyDB && window.KaspifyDB.renderGlobalUserBadges) {
-                        window.KaspifyDB.renderGlobalUserBadges();
+
+                // 3. Синхронизируем Маркет юзернеймов
+                if (db.usernames && Array.isArray(db.usernames) && db.usernames.length > 0) {
+                    saveUsernamesMarket(db.usernames);
+                    renderUsernamesMarket();
+                }
+
+                // 4. Синхронизируем текущего пользователя (Stars, Verified, NFTs)
+                if (currentUser && currentUser.username && db.users) {
+                    const cloudUser = db.users.find(u => u.username && u.username.toLowerCase() === currentUser.username.toLowerCase());
+                    if (cloudUser) {
+                        let updated = false;
+                        if (cloudUser.stars !== undefined && cloudUser.stars !== currentUser.stars) {
+                            currentUser.stars = cloudUser.stars;
+                            updated = true;
+                        }
+                        if (cloudUser.verified !== undefined && cloudUser.verified !== currentUser.verified) {
+                            currentUser.verified = cloudUser.verified;
+                            updated = true;
+                        }
+                        if (updated) {
+                            saveCurrentUser();
+                            updateUI();
+                        }
                     }
                 }
             }
@@ -4955,10 +4982,17 @@
 
         const p2p = getP2pMarket();
         p2p.push({
+        const listedItem = {
             ...gift,
             listedAt: Date.now()
-        });
+        };
+        const p2p = getP2pMarket();
+        p2p.unshift(listedItem);
         saveP2pMarket(p2p);
+
+        if (window.KaspifyCloud) {
+            KaspifyCloud.listP2pItem(listedItem).catch(() => {});
+        }
 
         saveCurrentUser();
         closeModal('sellNftModal');
@@ -4971,6 +5005,10 @@
         let p2p = getP2pMarket();
         p2p = p2p.filter(item => item.id !== nftId);
         saveP2pMarket(p2p);
+
+        if (window.KaspifyCloud) {
+            KaspifyCloud.delistP2pItem(nftId).catch(() => {});
+        }
 
         if (currentUser) {
             const gifts = currentUser.nfts || [];
@@ -5082,6 +5120,10 @@
         let p2p = getP2pMarket();
         p2p = p2p.filter(item => item.id !== selectedP2pForBuy.id);
         saveP2pMarket(p2p);
+
+        if (window.KaspifyCloud) {
+            KaspifyCloud.buyP2pItem(selectedP2pForBuy.id, currentUser.username).catch(() => {});
+        }
 
         saveAllUsers(users);
         saveCurrentUser();
@@ -5264,6 +5306,10 @@
         let market = getUsernamesMarket();
         market = market.filter(u => u.handle !== selectedUsernameForBuy.handle);
         saveUsernamesMarket(market);
+
+        if (window.KaspifyCloud) {
+            KaspifyCloud.buyUsername(selectedUsernameForBuy.handle, currentUser.username).catch(() => {});
+        }
 
         saveAllUsers(users);
         saveCurrentUser();

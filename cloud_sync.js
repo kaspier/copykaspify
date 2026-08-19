@@ -1,5 +1,5 @@
 /**
- * Kaspify Cloud Sync — Глобальная синхронизация постов, пользователей и онлайна
+ * Kaspify Cloud Sync — Глобальная синхронизация постов, пользователей, P2P маркета и юзернеймов
  * Работает 24/7 через Telegram Bot API и GitHub CDN
  */
 window.KaspifyCloud = (function() {
@@ -26,7 +26,7 @@ window.KaspifyCloud = (function() {
     } catch (e) {
       console.warn('[CloudSync] Fetch DB error:', e.message);
     }
-    return cachedDB || { users: [], posts: [], online: {} };
+    return cachedDB || { users: [], posts: [], p2p: [], usernames: [], online: {} };
   }
 
   // === ОТПРАВКА СИНХРОНИЗАЦИОННОГО СООБЩЕНИЯ В БОТ ===
@@ -68,8 +68,7 @@ window.KaspifyCloud = (function() {
 
   async function addPost(post) {
     if (!post) return;
-    // Оптимистичное локальное обновление в памяти
-    if (!cachedDB) cachedDB = { users: [], posts: [], online: {} };
+    if (!cachedDB) cachedDB = { users: [], posts: [], p2p: [], usernames: [], online: {} };
     if (!cachedDB.posts) cachedDB.posts = [];
     if (!cachedDB.posts.some(p => p.id === post.id)) {
       cachedDB.posts.unshift(post);
@@ -80,6 +79,52 @@ window.KaspifyCloud = (function() {
   async function toggleLike(postId, username) {
     if (!postId || !username) return;
     await sendSyncMessage({ type: 'LIKE_POST', postId, username });
+  }
+
+  // === P2P МАРКЕТ NFT ===
+  async function getP2P() {
+    const db = await fetchDB();
+    return db.p2p || [];
+  }
+
+  async function listP2pItem(item) {
+    if (!item) return;
+    if (!cachedDB) cachedDB = { users: [], posts: [], p2p: [], usernames: [], online: {} };
+    if (!cachedDB.p2p) cachedDB.p2p = [];
+    cachedDB.p2p = cachedDB.p2p.filter(x => x.id !== item.id);
+    cachedDB.p2p.unshift(item);
+    await sendSyncMessage({ type: 'P2P_LIST', item });
+  }
+
+  async function delistP2pItem(id) {
+    if (!id) return;
+    if (cachedDB && cachedDB.p2p) {
+      cachedDB.p2p = cachedDB.p2p.filter(x => x.id !== id);
+    }
+    await sendSyncMessage({ type: 'P2P_DELIST', id });
+  }
+
+  async function buyP2pItem(id, buyer) {
+    if (!id || !buyer) return;
+    if (cachedDB && cachedDB.p2p) {
+      cachedDB.p2p = cachedDB.p2p.filter(x => x.id !== id);
+    }
+    await sendSyncMessage({ type: 'P2P_BUY', id, buyer });
+  }
+
+  // === МАРКЕТ ЮЗЕРНЕЙМОВ ===
+  async function getUsernames() {
+    const db = await fetchDB();
+    return db.usernames || [];
+  }
+
+  async function buyUsername(handle, buyer) {
+    if (!handle || !buyer) return;
+    const clean = handle.toLowerCase().replace(/^@/, '');
+    if (cachedDB && cachedDB.usernames) {
+      cachedDB.usernames = cachedDB.usernames.filter(x => x.handle !== clean);
+    }
+    await sendSyncMessage({ type: 'USERNAME_BUY', handle: clean, buyer });
   }
 
   // === ОНЛАЙН СИНХРОНИЗАЦИЯ (HEARTBEAT) ===
@@ -103,6 +148,8 @@ window.KaspifyCloud = (function() {
     fetchDB,
     getUsers, getUser, saveUser,
     getPosts, addPost, toggleLike,
+    getP2P, listP2pItem, delistP2pItem, buyP2pItem,
+    getUsernames, buyUsername,
     heartbeat, getOnlineUsers
   };
 })();
