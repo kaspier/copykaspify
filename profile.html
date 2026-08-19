@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <script src="cloud_sync.js"></script>
+    <script src="auth.js"></script>
     <style>
         :root {
             --tg-bg: #0e1621;
@@ -1307,6 +1309,15 @@
             <img id="headerUserAvatar" src="checklogo.png" alt="Avatar" class="nav-user-avatar" onclick="openSwitchAccountModal()" title="Сменить аккаунт / Регистрация">
         </div>
     </header>
+
+    <script>
+    // Periodic refresh: sync with server and fetch latest posts every 5 seconds
+    setInterval(() => {
+        syncWithServer();
+        // Fetch cloud posts (includes API and cloud sync)
+        fetchCloudPosts();
+    }, 5000);
+    </script>
 
     <!-- 1. FEED SCREEN -->
     <main id="screenFeed" class="screen-view active">
@@ -4049,6 +4060,10 @@
     });
 
     function initUsersDatabase() {
+        if (!localStorage.getItem('kaspi_users_db')) {
+            localStorage.setItem('kaspi_users_db', JSON.stringify([]));
+        }
+
         if (!localStorage.getItem('kaspi_kaspify_posts') || JSON.parse(localStorage.getItem('kaspi_kaspify_posts') || '[]').length === 0) {
             const initialPosts = [
                 {
@@ -4060,7 +4075,7 @@
                     authorVerified: true,
                     text: "Добро пожаловать в Kaspify Social Network! 🎉 Покупайте лимитированные NFT подарки (12 000 уникальных комбинаций), коллекционируйте редкие юзернеймы Telegram и делитесь публикациями со всем сообществом.",
                     media: null,
-                    likes: ["patexr", "ksuzq"],
+                    likes: [],
                     reposts: 0,
                     tipsStars: 100,
                     createdAt: Date.now() - 3600000
@@ -4080,7 +4095,7 @@
                     variation: "Ruby Gold Edition",
                     serial: "#0007",
                     salePrice: 1200,
-                    seller: "patexr",
+                    seller: "system",
                     backdrop: "radial-gradient(circle at 50% 35%, #881337 0%, #4c0519 100%)",
                     listedAt: Date.now()
                 },
@@ -4093,7 +4108,7 @@
                     variation: "Cyan Crystal",
                     serial: "#0042",
                     salePrice: 850,
-                    seller: "ksuzq",
+                    seller: "system",
                     backdrop: "radial-gradient(circle at 50% 35%, #0e7490 0%, #164e63 100%)",
                     listedAt: Date.now()
                 }
@@ -4140,9 +4155,23 @@
             }
         }
 
-        if (!currentUser && window.KaspifyDB) {
-            window.KaspifyDB.openAuthModal(true);
-            return;
+        if (!currentUser) {
+            currentUser = {
+                id: 'user_' + Date.now(),
+                username: 'user',
+                fullname: 'Пользователь Kaspify',
+                stars: 100,
+                balance: 250000,
+                verified: false,
+                avatar: 'checklogo.png',
+                bio: 'Официальный аккаунт Kaspify ✨',
+                nfts: [],
+                ownedUsernames: []
+            };
+            const users = getAllUsers();
+            users.push(currentUser);
+            saveAllUsers(users);
+            localStorage.setItem('kaspi_active_username', 'user');
         }
 
         updateUI();
@@ -4150,15 +4179,23 @@
         // Живая синхронизация с сервером бота (Stars, галочка верификации и статус онлайн)
         if (currentUser && currentUser.username) {
             syncWithServer();
-            setInterval(syncWithServer, 3000);
+            setInterval(syncWithServer, 5000);
         }
+    }
+
+    function getApiBase() {
+        if (window.location.hostname === 'localhost' || window.location.protocol === 'file:') {
+            return 'http://localhost:8888/api';
+        }
+        if (window.location.hostname.includes('onrender.com')) {
+            return '/api';
+        }
+        return 'https://copykaspify.onrender.com/api';
     }
 
     async function syncWithServer() {
         if (!currentUser || !currentUser.username) return;
-        const apiBase = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-            ? 'http://localhost:8888/api' 
-            : '/api';
+        const apiBase = getApiBase();
         
         try {
             // Heartbeat для отображения в /online у админа
@@ -4299,21 +4336,32 @@
 
     async function fetchCloudPosts() {
         try {
-            if (window.KaspifyCloud) {
+            const localPosts = getPosts();
+            const postMap = new Map();
+            (localPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+
+            if (window.KaspifyCloud && window.KaspifyCloud.getPosts) {
                 const cloudPosts = await KaspifyCloud.getPosts();
-                const localPosts = getPosts();
-                
-                const postMap = new Map();
-                (localPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
                 (cloudPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
-                
-                const merged = Array.from(postMap.values());
-                merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                
-                savePosts(merged);
-                renderPostsFeed();
-                renderUserPosts();
             }
+
+            try {
+                const apiBase = getApiBase();
+                const resp = await fetch(`${apiBase}/posts`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data && data.posts && Array.isArray(data.posts)) {
+                        data.posts.forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+                    }
+                }
+            } catch(e) {}
+
+            const merged = Array.from(postMap.values());
+            merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            savePosts(merged);
+            renderPostsFeed();
+            renderUserPosts();
         } catch (e) {}
     }
 
@@ -4409,13 +4457,23 @@
         textInput.value = '';
         clearComposerMedia();
         renderPostsFeed();
-        showToast("Пост опубликован для всех пользователей! 🚀");
+        renderUserPosts();
 
         // Глобальная публикация в облако
-        if (window.KaspifyCloud) {
+        if (window.KaspifyCloud && window.KaspifyCloud.addPost) {
             await KaspifyCloud.addPost(newPost);
-            await fetchCloudPosts();
         }
+
+        try {
+            const apiBase = getApiBase();
+            fetch(`${apiBase}/posts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newPost)
+            }).catch(() => {});
+        } catch(e) {}
+
+        showToast("Пост опубликован для всех пользователей! 🚀");
     }
 
     function renderPostsFeed() {
@@ -4478,7 +4536,9 @@
                             </div>
                         </div>
                     </div>
-                    ${currentUser && post.authorUsername === currentUser.username ? `
+                     <button class="post-action-btn" onclick="sharePost('${post.id}')">
+                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                     </button>                ${currentUser && post.authorUsername === currentUser.username ? `
                         <button class="modal-close-btn" onclick="deletePost('${post.id}')" title="Удалить пост">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         </button>
@@ -4497,7 +4557,7 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         <span>${post.tipsStars || 0} ⭐</span>
                     </button>
-                    <button class="post-action-btn" onclick="showToast('Ссылка на пост скопирована')">
+                                        <button class="post-action-btn" onclick="sharePost('${post.id}')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                     </button>
                 </div>
@@ -4523,10 +4583,18 @@
         renderPostsFeed();
         renderUserPosts();
 
-        if (window.KaspifyCloud) {
+        if (window.KaspifyCloud && window.KaspifyCloud.toggleLike) {
             await KaspifyCloud.toggleLike(postId, currentUser.username);
-            await fetchCloudPosts();
         }
+
+        try {
+            const apiBase = getApiBase();
+            fetch(`${apiBase}/posts/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, username: currentUser.username })
+            }).catch(() => {});
+        } catch(e) {}
     }
 
     function tipAuthorStars(authorUsername) {
@@ -4552,6 +4620,39 @@
         saveCurrentUser();
         updateUI();
         showToast(`Вы отправили 10 ⭐ автору @${authorUsername}! 🎁`);
+    }
+
+    // Share a post using Web Share API or fallback to copy URL
+    async function sharePost(postId) {
+        const apiBase = getApiBase();
+        const shareUrl = `${apiBase}/posts/${postId}`;
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: 'Check out this post', url: shareUrl });
+            } catch (err) {
+                // fallback to copy
+                copyToClipboard(shareUrl);
+                showToast('Ссылка на пост скопирована');
+            }
+        } else {
+            copyToClipboard(shareUrl);
+            showToast('Ссылка на пост скопирована');
+        }
+    }
+
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).catch(() => {});
+        } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(textarea);
+        }
     }
 
     function deletePost(postId) {
@@ -4978,10 +5079,6 @@
         gift.onSale = true;
         gift.salePrice = price;
         gift.seller = currentUser.username;
-        gift.sellerName = currentUser.fullname;
-
-        const p2p = getP2pMarket();
-        p2p.push({
         const listedItem = {
             ...gift,
             listedAt: Date.now()
@@ -5501,7 +5598,5 @@
         );
     }
 </script>
-<script src="cloud_sync.js"></script>
-<script src="auth.js"></script>
 </body>
 </html>
