@@ -4045,17 +4045,6 @@
     });
 
     function initUsersDatabase() {
-        if (localStorage.getItem('kaspi_db_version') !== DB_VERSION) {
-            localStorage.removeItem('kaspi_users_db');
-            localStorage.removeItem('kaspi_active_username');
-            localStorage.removeItem('kaspi_is_authenticated');
-            localStorage.removeItem('kaspi_kaspify_posts');
-            localStorage.removeItem('kaspi_market_listings');
-            localStorage.removeItem('kaspi_p2p_market');
-            localStorage.removeItem('kaspi_usernames_market');
-            localStorage.setItem('kaspi_db_version', DB_VERSION);
-        }
-
         if (!localStorage.getItem('kaspi_kaspify_posts')) {
             localStorage.setItem('kaspi_kaspify_posts', JSON.stringify([]));
         }
@@ -4078,13 +4067,17 @@
     }
 
     function loadActiveUser() {
-        if (window.KaspifyDB) {
+        if (window.KaspifyDB && window.KaspifyDB.getCurrentUser) {
             currentUser = window.KaspifyDB.getCurrentUser();
-        } else {
+        }
+        if (!currentUser) {
             const users = getAllUsers();
             const activeUsername = localStorage.getItem('kaspi_active_username');
             if (activeUsername && users.length > 0) {
                 currentUser = users.find(u => u.username && u.username.toLowerCase() === activeUsername.toLowerCase());
+            }
+            if (!currentUser && users.length > 0) {
+                currentUser = users[0];
             }
         }
 

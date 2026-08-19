@@ -93,7 +93,7 @@ function getUserMainMenuKeyboard(username = '') {
         { text: '✅ Запросить синюю галочку (Верификация)', callback_data: cleanU ? `req_verify_${cleanU}` : 'action_prompt_verify' }
       ],
       [
-        { text: '🌐 Открыть Kaspify', url: 'https://hevonelow.github.io/copykaspify/' }
+        { text: '🌐 Открыть Kaspify', url: 'https://kaspier.github.io/kaspify/' }
       ]
     ]
   };
