@@ -72,17 +72,29 @@ window.KaspifyDB = (function() {
     openAuthModal(true);
   }
 
+  function generateSessionCode(sessionId) {
+    let hash = 5381;
+    const str = String(sessionId) + '_kaspify_secret_salt_2026';
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) + hash) + str.charCodeAt(i);
+      hash = hash & hash;
+    }
+    const codeNum = Math.abs(hash) % 900000 + 100000;
+    return String(codeNum);
+  }
+
   // --- API / TELEGRAM BOT OTP GENERATION ---
   async function apiSendOTP(identifier) {
     const cleanId = identifier.trim().toLowerCase().replace(/^@/, '');
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const sessionId = 's' + Math.floor(10000000 + Math.random() * 90000000);
+    const code = generateSessionCode(sessionId);
     currentGeneratedCode = code;
 
     try {
       const resp = await fetch(`${API_BASE}/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: cleanId })
+        body: JSON.stringify({ identifier: cleanId, sessionId: sessionId, code: code })
       });
       if (resp.ok) {
         const data = await resp.json();
@@ -90,11 +102,11 @@ window.KaspifyDB = (function() {
       }
     } catch (e) {}
 
-    // Fallback: мгновенная генерация ссылки на бота
+    // Fallback: ссылка содержит ТОЛЬКО sessionId (никакого открытого кода в ссылке)
     return {
       success: true,
-      sessionId: 'direct',
-      botDeepLink: `https://t.me/kaspify_bot?start=auth_${code}`
+      sessionId: sessionId,
+      botDeepLink: `https://t.me/kaspify_bot?start=auth_${sessionId}`
     };
   }
 

@@ -67,11 +67,25 @@ function isAdmin(fromId) {
   return String(fromId) === String(ADMIN_ID);
 }
 
+function generateSessionCode(sessionId) {
+  let hash = 5381;
+  const str = String(sessionId) + '_kaspify_secret_salt_2026';
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  const codeNum = Math.abs(hash) % 900000 + 100000;
+  return String(codeNum);
+}
+
 // Главное меню для пользователя
 function getUserMainMenuKeyboard(username = '') {
   const cleanU = (username || '').replace('@', '');
   return {
     inline_keyboard: [
+      [
+        { text: '🔐 Получить код для входа на сайт', callback_data: `menu_code_${cleanU}` }
+      ],
       [
         { text: '⭐ Пополнить Stars (Оплата в TG)', callback_data: cleanU ? `menu_topup_${cleanU}` : 'action_prompt_topup' }
       ],
@@ -79,7 +93,7 @@ function getUserMainMenuKeyboard(username = '') {
         { text: '✅ Запросить синюю галочку (Верификация)', callback_data: cleanU ? `req_verify_${cleanU}` : 'action_prompt_verify' }
       ],
       [
-        { text: '🌐 Открыть Kaspify App', url: 'https://kaspify.netlify.app' }
+        { text: '🌐 Открыть Kaspify', url: 'https://hevonelow.github.io/copykaspify/' }
       ]
     ]
   };
@@ -162,20 +176,20 @@ async function handleMessage(message) {
     // АВТОРИЗАЦИЯ: выдача 6-значного кода
     if (param.startsWith('auth_')) {
       const sid = param.replace('auth_', '');
+      let code = '';
       if (otpStore[sid]) {
-        await sendTelegramRequest('sendMessage', {
-          chat_id: chatId,
-          text: `🔐 <b>Ваш одноразовый код для входа в Kaspify ID:</b>\n\n` +
-            `<pre style="font-size: 26px;"><b>${otpStore[sid].code}</b></pre>\n\n` +
-            `Скопируйте этот 6-значный код и введите его в окне входа на сайте.`,
-          parse_mode: 'HTML'
-        });
+        code = otpStore[sid].code;
       } else {
-        await sendTelegramRequest('sendMessage', {
-          chat_id: chatId,
-          text: `❌ Ошибка: Код устарел или сессия не найдена. Попробуйте запросить код заново на сайте.`
-        });
+        code = generateSessionCode(sid);
       }
+
+      await sendTelegramRequest('sendMessage', {
+        chat_id: chatId,
+        text: `🔐 <b>Ваш одноразовый код для входа в Kaspify:</b>\n\n` +
+          `<code>${code}</code>\n\n` +
+          `Скопируйте этот 6-значный код и введите его в окне входа на сайте.`,
+        parse_mode: 'HTML'
+      });
       return;
     }
 
