@@ -153,9 +153,17 @@ window.KaspifyCloud = (function() {
   }
 
   async function addPost(post) {
+    if (cachedDB) {
+      if (!cachedDB.posts) cachedDB.posts = [];
+      if (!cachedDB.posts.some(p => p.id === post.id)) {
+        cachedDB.posts.unshift(post);
+      }
+    }
     const db = await fetchDB(true);
     if (!db.posts) db.posts = [];
-    db.posts.unshift(post);
+    if (!db.posts.some(p => p.id === post.id)) {
+      db.posts.unshift(post);
+    }
     if (db.posts.length > 100) db.posts = db.posts.slice(0, 100);
     return await saveDB(db);
   }

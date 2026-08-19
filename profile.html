@@ -4245,11 +4245,19 @@
     async function fetchCloudPosts() {
         try {
             if (window.KaspifyCloud) {
-                const posts = await KaspifyCloud.getPosts();
-                if (posts && Array.isArray(posts)) {
-                    savePosts(posts);
-                    renderPostsFeed();
-                }
+                const cloudPosts = await KaspifyCloud.getPosts();
+                const localPosts = getPosts();
+                
+                const postMap = new Map();
+                (localPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+                (cloudPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+                
+                const merged = Array.from(postMap.values());
+                merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                
+                savePosts(merged);
+                renderPostsFeed();
+                renderUserPosts();
             }
         } catch (e) {}
     }
