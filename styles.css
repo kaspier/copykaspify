@@ -2292,6 +2292,27 @@ input:checked + .slider:before {
 }
 
 /* ===== SUPERCELL ID EMAIL OTP MODAL STYLES ===== */
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+#toast-notification {
+    z-index: 1000000 !important;
+}
+
 .supercell-modal-card {
     background: #0f172a;
     color: #ffffff;

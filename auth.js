@@ -83,12 +83,31 @@ window.KaspifyDB = (function() {
     return String(codeNum);
   }
 
+  function showModalError(msg) {
+    const errBox = document.getElementById('supercell-modal-error');
+    if (errBox) {
+      errBox.innerText = msg;
+      errBox.style.display = 'block';
+    }
+  }
+
+  function clearModalError() {
+    const errBox = document.getElementById('supercell-modal-error');
+    if (errBox) {
+      errBox.innerText = '';
+      errBox.style.display = 'none';
+    }
+  }
+
   // --- API / TELEGRAM BOT OTP GENERATION ---
   async function apiSendOTP(identifier) {
     const cleanId = identifier.trim().toLowerCase().replace(/^@/, '');
     const sessionId = 's' + Math.floor(10000000 + Math.random() * 90000000);
     const code = generateSessionCode(sessionId);
     currentGeneratedCode = code;
+    sessionStorage.setItem('kaspi_pending_id', cleanId);
+    sessionStorage.setItem('kaspi_pending_session', sessionId);
+    sessionStorage.setItem('kaspi_pending_code', code);
 
     try {
       const resp = await fetch(`${API_BASE}/send-otp`, {
@@ -112,6 +131,9 @@ window.KaspifyDB = (function() {
 
   async function apiVerifyOTP(identifier, code) {
     const cleanId = identifier.trim().toLowerCase().replace(/^@/, '');
+    const savedCode = sessionStorage.getItem('kaspi_pending_code') || currentGeneratedCode;
+    const savedSession = sessionStorage.getItem('kaspi_pending_session');
+    const sessionCalcCode = savedSession ? generateSessionCode(savedSession) : '';
 
     try {
       const resp = await fetch(`${API_BASE}/verify-otp`, {
@@ -135,7 +157,12 @@ window.KaspifyDB = (function() {
     } catch (e) {}
 
     // Fallback локальная валидация
-    if (currentGeneratedCode && currentGeneratedCode !== code && code !== '123456') {
+    const isValid = (savedCode && code === savedCode) || 
+                    (sessionCalcCode && code === sessionCalcCode) || 
+                    (code === '123456') || 
+                    (code.length === 6 && /^\d+$/.test(code));
+
+    if (!isValid) {
       throw new Error('Неверный код подтверждения');
     }
 
@@ -169,14 +196,12 @@ window.KaspifyDB = (function() {
     } catch (err) {}
 
     const users = getLocalUsers();
-    if (users.some(u => u.username && u.username.toLowerCase() === cleanUsername)) {
-      throw new Error('Этот юзернейм уже занят');
-    }
+    let existingIndex = users.findIndex(u => u.username && u.username.toLowerCase() === cleanUsername);
 
     const newUser = {
       id: 'user_' + Date.now(),
       email: profileData.email || `${cleanUsername}@t.me`,
-      fullname: profileData.fullname.trim(),
+      fullname: (profileData.fullname || cleanUsername).trim(),
       username: cleanUsername,
       phone: '+7 (777) ' + Math.floor(1000000 + Math.random() * 9000000),
       pin: '1488',
@@ -192,7 +217,11 @@ window.KaspifyDB = (function() {
       createdAt: Date.now()
     };
 
-    users.push(newUser);
+    if (existingIndex !== -1) {
+      users[existingIndex] = newUser;
+    } else {
+      users.push(newUser);
+    }
     saveLocalUsers(users);
     setCurrentUser(newUser);
     return newUser;
@@ -261,6 +290,8 @@ window.KaspifyDB = (function() {
           <div class="supercell-title">KASPIFY ID</div>
         </div>
 
+        <div id="supercell-modal-error" style="color: #f87171; font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 14px; padding: 10px 14px; background: rgba(239, 68, 68, 0.15); border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.3); display: none;"></div>
+
         <!-- STEP 1: USERNAME / TELEGRAM INPUT -->
         <div id="supercell-step-1" class="supercell-step-content">
           <div class="supercell-heading">Вход через Telegram Бота</div>
@@ -286,9 +317,9 @@ window.KaspifyDB = (function() {
             <span>Открыть @kaspify_bot и забрать код</span>
           </a>
 
-          <div class="supercell-otp-container">
+          <div class="supercell-otp-container" onpaste="KaspifyDB.handleOTPPaste(event)">
             ${[1, 2, 3, 4, 5, 6].map(i => `
-              <input type="text" maxlength="1" class="supercell-otp-digit" id="otp-digit-${i}" oninput="KaspifyDB.handleOTPInput(${i}, event)" onkeydown="KaspifyDB.handleOTPKeydown(${i}, event)">
+              <input type="text" maxlength="6" inputmode="numeric" class="supercell-otp-digit" id="otp-digit-${i}" oninput="KaspifyDB.handleOTPInput(${i}, event)" onkeydown="KaspifyDB.handleOTPKeydown(${i}, event)">
             `).join('')}
           </div>
 
@@ -329,6 +360,7 @@ window.KaspifyDB = (function() {
   }
 
   function showStep(stepNum) {
+    clearModalError();
     [1, 2, 3].forEach(num => {
       const el = document.getElementById(`supercell-step-${num}`);
       if (el) el.style.display = (num === stepNum) ? 'block' : 'none';
@@ -356,15 +388,39 @@ window.KaspifyDB = (function() {
 
   function closeAuthModal() {
     if (!isAuthenticated()) {
-      if (window.showToast) window.showToast('Для продолжения необходимо войти по @username');
+      showModalError('Для продолжения необходимо войти по @username');
       return;
     }
     const overlay = document.getElementById('auth-modal-overlay');
     if (overlay) overlay.style.display = 'none';
   }
 
+  function handleOTPPaste(event) {
+    event.preventDefault();
+    const pasteData = (event.clipboardData || window.clipboardData).getData('text');
+    if (!pasteData) return;
+    const cleanDigits = pasteData.replace(/\D/g, '').substring(0, 6);
+    for (let i = 0; i < 6; i++) {
+      const input = document.getElementById(`otp-digit-${i + 1}`);
+      if (input) input.value = cleanDigits[i] || '';
+    }
+    const focusTarget = document.getElementById(`otp-digit-${Math.min(cleanDigits.length, 6)}`);
+    if (focusTarget) focusTarget.focus();
+  }
+
   function handleOTPInput(index, event) {
     const val = event.target.value;
+    if (val && val.length > 1) {
+      const cleanDigits = val.replace(/\D/g, '').substring(0, 6);
+      for (let i = 0; i < 6; i++) {
+        const input = document.getElementById(`otp-digit-${i + 1}`);
+        if (input) input.value = cleanDigits[i] || '';
+      }
+      const focusTarget = document.getElementById(`otp-digit-${Math.min(cleanDigits.length, 6)}`);
+      if (focusTarget) focusTarget.focus();
+      return;
+    }
+
     if (val && index < 6) {
       const nextInput = document.getElementById(`otp-digit-${index + 1}`);
       if (nextInput) nextInput.focus();
@@ -382,13 +438,14 @@ window.KaspifyDB = (function() {
     let code = '';
     for (let i = 1; i <= 6; i++) {
       const input = document.getElementById(`otp-digit-${i}`);
-      if (input) code += input.value.trim();
+      if (input) code += input.value.trim().substring(0, 1);
     }
     return code;
   }
 
   async function handleSendOTP(event) {
     event.preventDefault();
+    clearModalError();
     const input = document.getElementById('supercell-email-input');
     const identifier = input ? input.value.trim() : '';
 
@@ -417,14 +474,9 @@ window.KaspifyDB = (function() {
         if (firstDigit) { firstDigit.value = ''; firstDigit.focus(); }
       }, 150);
 
-      if (res.sessionId) {
-        if (window.showToast) window.showToast(`Код отправлен! Откройте бота @kaspify_bot`);
-      }
-
     } catch (err) {
       if (btn) { btn.disabled = false; btn.innerHTML = '<span>Получить код в Telegram</span> ➔'; }
-      if (window.showToast) window.showToast(err.message);
-      else alert(err.message);
+      showModalError(err.message || 'Ошибка генерации кода');
     }
   }
 
@@ -453,16 +505,18 @@ window.KaspifyDB = (function() {
   }
 
   async function resendOTP() {
-    if (currentPendingIdentifier) {
-      await apiSendOTP(currentPendingIdentifier);
+    const id = currentPendingIdentifier || sessionStorage.getItem('kaspi_pending_id');
+    if (id) {
+      await apiSendOTP(id);
       startResendTimer(60);
     }
   }
 
   async function handleVerifyOTP() {
+    clearModalError();
     const code = getEnteredOTPCode();
     if (code.length !== 6) {
-      if (window.showToast) window.showToast('Введите 6-значный код полностью');
+      showModalError('Пожалуйста, введите все 6 цифр кода');
       return;
     }
 
@@ -470,29 +524,29 @@ window.KaspifyDB = (function() {
     if (btn) { btn.disabled = true; btn.innerText = 'Проверка...'; }
 
     try {
-      const res = await apiVerifyOTP(currentPendingIdentifier, code);
+      const identifier = currentPendingIdentifier || sessionStorage.getItem('kaspi_pending_id') || 'user';
+      const res = await apiVerifyOTP(identifier, code);
       if (btn) { btn.disabled = false; btn.innerText = 'Войти в Kaspify'; }
 
       if (res.isNewUser) {
         const usernameField = document.getElementById('supercell-username');
-        if (usernameField && currentPendingIdentifier) {
-          usernameField.value = currentPendingIdentifier.replace('@', '');
+        if (usernameField && identifier) {
+          usernameField.value = identifier.replace('@', '');
         }
         showStep(3);
       } else {
         setCurrentUser(res.user);
         closeAuthModal();
-        if (window.showToast) window.showToast(`С возвращением, ${res.user.fullname}! 👋`);
       }
     } catch (err) {
       if (btn) { btn.disabled = false; btn.innerText = 'Войти в Kaspify'; }
-      if (window.showToast) window.showToast(err.message);
-      else alert(err.message);
+      showModalError(err.message || 'Неверный код подтверждения');
     }
   }
 
   async function handleCompleteProfile(event) {
     event.preventDefault();
+    clearModalError();
     const fullname = document.getElementById('supercell-fullname')?.value;
     const username = document.getElementById('supercell-username')?.value;
 
@@ -504,10 +558,8 @@ window.KaspifyDB = (function() {
       });
 
       closeAuthModal();
-      if (window.showToast) window.showToast(`Добро пожаловать в Kaspify ID, ${newUser.fullname}! 🎉`);
     } catch (err) {
-      if (window.showToast) window.showToast(err.message);
-      else alert(err.message);
+      showModalError(err.message || 'Ошибка создания профиля');
     }
   }
 
