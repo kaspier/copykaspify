@@ -4647,20 +4647,20 @@
 
     // Share a post using Web Share API or fallback to copy URL
     async function sharePost(postId) {
-        const apiBase = getApiBase();
-        const shareUrl = `${apiBase}/posts/${postId}`;
+        // Build a link to the frontend page, not the API
+        const origin = window.location.origin || 'https://copykaspify.onrender.com';
+        const page = window.location.pathname || '/profile.html';
+        const shareUrl = `${origin}${page}?post=${postId}`;
         if (navigator.share) {
             try {
-                await navigator.share({ title: 'Check out this post', url: shareUrl });
+                await navigator.share({ title: 'Пост в Kaspify', url: shareUrl });
+                return; // user shared successfully
             } catch (err) {
-                // fallback to copy
-                copyToClipboard(shareUrl);
-                showToast('Ссылка на пост скопирована');
+                // user cancelled or error — fall through to copy
             }
-        } else {
-            copyToClipboard(shareUrl);
-            showToast('Ссылка на пост скопирована');
         }
+        copyToClipboard(shareUrl);
+        showToast('Ссылка на пост скопирована ✅');
     }
 
     function copyToClipboard(text) {
