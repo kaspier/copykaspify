@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const BOT_TOKEN = process.argv[2] || process.env.TELEGRAM_BOT_TOKEN || '8745809636:AAHG-CU-SIlM1otpXPv5b21Lu11YUacabuY';
-const ADMIN_ID = 8283038522; // ID администратора
+const ADMIN_ID = process.env.ADMIN_ID ? Number(process.env.ADMIN_ID) : 8283038522; // ID администратора
 
 let otpStore = {}; // Memory store for OTP sessions
 
