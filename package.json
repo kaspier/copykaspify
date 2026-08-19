@@ -1,0 +1,12 @@
+{
+  "name": "kaspify-app",
+  "version": "1.0.0",
+  "description": "Kaspify Web App with Netlify Serverless API & Email OTP Authentication",
+  "main": "index.html",
+  "scripts": {
+    "test": "node netlify/functions/api.js"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  }
+}
