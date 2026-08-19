@@ -55,6 +55,10 @@ window.KaspifyDB = (function() {
     }
     saveLocalUsers(users);
 
+    if (window.KaspifyCloud) {
+      KaspifyCloud.saveUser(user).catch(() => {});
+    }
+
     renderGlobalUserBadges();
     
     if (typeof window.loadActiveUser === 'function') {

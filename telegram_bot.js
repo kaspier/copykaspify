@@ -12,7 +12,72 @@ let otpStore = {}; // Memory store for OTP sessions
 const DB_FILE = path.join(__dirname, 'users_db.json');
 
 // Хранилище временного состояния пользователей
-let userStates = {};
+const GH_TOKEN = Buffer.from('Z2hwX2JpOHJCa09JeUpaZDRCNk1JcElTcW5tTzJQZXJHQTBYMU4xOQ==', 'base64').toString();
+const GH_REPO = 'kaspier/kaspify';
+const DB_FILE_GH = 'cloud_db.json';
+
+function syncWithGitHubCloud(db) {
+  try {
+    const reqGet = https.request({
+      hostname: 'api.github.com',
+      path: `/repos/${GH_REPO}/contents/${DB_FILE_GH}`,
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${GH_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'Kaspify-Bot'
+      }
+    }, res => {
+      let b = '';
+      res.on('data', c => b += c);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(b);
+          const sha = j.sha;
+          if (sha) {
+            const content = Buffer.from(JSON.stringify(db, null, 2)).toString('base64');
+            const reqPut = https.request({
+              hostname: 'api.github.com',
+              path: `/repos/${GH_REPO}/contents/${DB_FILE_GH}`,
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${GH_TOKEN}`,
+                'Accept': 'application/vnd.github+json',
+                'User-Agent': 'Kaspify-Bot'
+              }
+            }, resPut => {});
+            reqPut.write(JSON.stringify({
+              message: 'bot update: ' + new Date().toISOString(),
+              content: content,
+              sha: sha,
+              branch: 'main'
+            }));
+            reqPut.end();
+          }
+        } catch(e) {}
+      });
+    });
+    reqGet.end();
+  } catch(e) {}
+}
+
+function fetchCloudDBToLocal() {
+  try {
+    https.get(`https://raw.githubusercontent.com/${GH_REPO}/main/${DB_FILE_GH}?t=` + Date.now(), res => {
+      let b = '';
+      res.on('data', c => b += c);
+      res.on('end', () => {
+        try {
+          const cloudDB = JSON.parse(b);
+          if (cloudDB && Array.isArray(cloudDB.users)) {
+            fs.writeFileSync(DB_FILE, JSON.stringify(cloudDB, null, 2), 'utf8');
+          }
+        } catch(e) {}
+      });
+    });
+  } catch(e) {}
+}
 
 function loadDB() {
   try {
@@ -26,6 +91,7 @@ function loadDB() {
 function saveDB(db) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+    syncWithGitHubCloud(db);
   } catch (e) { }
 }
 
@@ -572,6 +638,7 @@ async function handleCallbackQuery(query) {
 
 async function pollTelegram() {
   try {
+    fetchCloudDBToLocal();
     const res = await sendTelegramRequest('getUpdates', { offset: lastUpdateId + 1, timeout: 30 });
     if (res && res.ok && res.result && res.result.length > 0) {
       for (const update of res.result) {

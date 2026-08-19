@@ -4041,9 +4041,11 @@
         loadActiveUser();
         renderPostsFeed();
         fetchCloudPosts();
+        syncUserWithCloud();
         renderMarketGrid('all');
         renderP2pMarketGrid();
         setInterval(fetchCloudPosts, 5000);
+        setInterval(syncUserWithCloud, 4000);
     });
 
     function initUsersDatabase() {
@@ -4240,28 +4242,48 @@
         document.getElementById('postImageInput').value = '';
     }
 
-    function getApiBase() {
-        return (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
-            ? 'http://localhost:8888/api' 
-            : 'https://lovely-baboon-66.loca.lt/api';
-    }
-
     async function fetchCloudPosts() {
         try {
-            const resp = await fetch(`${getApiBase()}/posts`, {
-                headers: { 'bypass-tunnel-reminder': 'true' }
-            });
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data && data.posts && Array.isArray(data.posts)) {
-                    savePosts(data.posts);
+            if (window.KaspifyCloud) {
+                const posts = await KaspifyCloud.getPosts();
+                if (posts && Array.isArray(posts)) {
+                    savePosts(posts);
                     renderPostsFeed();
                 }
             }
         } catch (e) {}
     }
 
-    function publishNewPost() {
+    async function syncUserWithCloud() {
+        if (!currentUser || !window.KaspifyCloud) return;
+        try {
+            // Heartbeat online
+            await KaspifyCloud.heartbeat(currentUser.username);
+
+            // Sync user data (stars, verified badge)
+            const cloudUser = await KaspifyCloud.getUser(currentUser.username);
+            if (cloudUser) {
+                let updated = false;
+                if (cloudUser.stars !== undefined && cloudUser.stars !== currentUser.stars) {
+                    currentUser.stars = cloudUser.stars;
+                    updated = true;
+                }
+                if (cloudUser.verified !== undefined && cloudUser.verified !== currentUser.verified) {
+                    currentUser.verified = cloudUser.verified;
+                    updated = true;
+                }
+                if (updated) {
+                    saveCurrentUser();
+                    updateUI();
+                    if (window.KaspifyDB && window.KaspifyDB.renderGlobalUserBadges) {
+                        window.KaspifyDB.renderGlobalUserBadges();
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    async function publishNewPost() {
         if (!currentUser) {
             KaspifyDB.openAuthModal(true);
             return;
@@ -4294,17 +4316,16 @@
         posts.unshift(newPost);
         savePosts(posts);
 
-        // Отправка в глобальное облако Kaspify API
-        fetch(`${getApiBase()}/posts`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true' },
-            body: JSON.stringify(newPost)
-        }).catch(() => {});
-
         textInput.value = '';
         clearComposerMedia();
         renderPostsFeed();
-        showToast("Пост успешно опубликован для всех! 🚀");
+        showToast("Пост опубликован для всех пользователей! 🚀");
+
+        // Глобальная публикация в облако
+        if (window.KaspifyCloud) {
+            await KaspifyCloud.addPost(newPost);
+            await fetchCloudPosts();
+        }
     }
 
     function renderPostsFeed() {
@@ -4390,7 +4411,7 @@
         `;
     }
 
-    function toggleLikePost(postId) {
+    async function toggleLikePost(postId) {
         if (!currentUser) { KaspifyDB.openAuthModal(true); return; }
         const posts = getPosts();
         const post = posts.find(p => p.id === postId);
@@ -4407,6 +4428,11 @@
         savePosts(posts);
         renderPostsFeed();
         renderUserPosts();
+
+        if (window.KaspifyCloud) {
+            await KaspifyCloud.toggleLike(postId, currentUser.username);
+            await fetchCloudPosts();
+        }
     }
 
     function tipAuthorStars(authorUsername) {
@@ -5361,6 +5387,7 @@
         );
     }
 </script>
+<script src="cloud_sync.js"></script>
 <script src="auth.js"></script>
 </body>
 </html>
