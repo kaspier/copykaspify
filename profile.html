@@ -391,6 +391,193 @@
             color: #ef4444;
         }
 
+        /* Post Comments Styles */
+        .post-comments-section {
+            border-top: 1px solid var(--tg-border-light);
+            padding-top: 12px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeInComments 0.2s ease-in-out;
+        }
+
+        @keyframes fadeInComments {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .comment-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--tg-surface-elevated);
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comment-avatar:hover {
+            opacity: 0.85;
+        }
+
+        .comment-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 2px;
+        }
+
+        .comment-author-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .comment-author-name:hover {
+            color: var(--tg-primary);
+            text-decoration: underline;
+        }
+
+        .comment-handle {
+            font-size: 11px;
+            color: var(--tg-text-secondary);
+        }
+
+        .comment-time {
+            font-size: 11px;
+            color: var(--tg-text-secondary);
+        }
+
+        .comment-text {
+            font-size: 13px;
+            color: var(--tg-text);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .comment-delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--tg-text-secondary);
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: auto;
+            opacity: 0.6;
+            transition: all 0.15s;
+        }
+
+        .comment-delete-btn:hover {
+            opacity: 1;
+            color: #ef4444;
+        }
+
+        .comment-composer-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .comment-input {
+            flex: 1;
+            background: var(--tg-surface-elevated);
+            border: 1px solid var(--tg-border);
+            border-radius: 20px;
+            padding: 8px 14px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .comment-input:focus {
+            border-color: var(--tg-primary);
+        }
+
+        .comment-send-btn {
+            background: var(--tg-primary);
+            color: #fff;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .comment-send-btn:hover {
+            background: #1a6cb3;
+            transform: scale(1.05);
+        }
+
+        .comment-send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .empty-comments-hint {
+            color: var(--tg-text-secondary);
+            font-size: 12px;
+            text-align: center;
+            padding: 10px 0;
+            font-style: italic;
+        }
+
+        /* View Other User Profile Modal */
+        .view-user-sheet {
+            max-width: 520px;
+            width: 100%;
+            background: var(--tg-bg);
+            border-radius: 20px 20px 0 0;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--tg-border);
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.6);
+        }
+
+        .view-user-content {
+            overflow-y: auto;
+            flex: 1;
+            padding-bottom: 20px;
+        }
+
         .empty-feed-placeholder {
             text-align: center;
             padding: 48px 24px;
@@ -1794,6 +1981,80 @@
             <button class="btn-modal-secondary" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="KaspifyDB.logout()">
                 Выйти из аккаунта
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- View Other User Profile Modal -->
+<div id="viewUserProfileModal" class="modal-overlay">
+    <div class="view-user-sheet">
+        <div class="modal-header" style="position: relative; z-index: 10; border-bottom: 1px solid var(--tg-border);">
+            <div class="modal-title" style="display: flex; align-items: center; gap: 6px;">
+                <span>Профиль пользователя</span>
+            </div>
+            <button class="modal-close-btn" onclick="closeModal('viewUserProfileModal')">✕</button>
+        </div>
+
+        <div class="view-user-content">
+            <section class="profile-hero" style="border-bottom: none;">
+                <div id="viewProfileCoverBanner" class="profile-cover-banner" style="min-height: 110px;"></div>
+
+                <div class="profile-avatar-row">
+                    <div class="profile-avatar-wrap">
+                        <img id="viewProfileAvatarImg" src="checklogo.png" alt="Profile avatar" class="profile-avatar-img">
+                    </div>
+
+                    <div class="profile-top-actions">
+                        <button class="btn-profile-action" onclick="tipViewedUserStars()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            <span>Чаевые ⭐</span>
+                        </button>
+                        <button class="btn-profile-action" onclick="shareViewedUserProfile()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                            <span>Поделиться</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="profile-details-box">
+                    <div class="profile-name-row">
+                        <span id="viewProfileDisplayName">Пользователь</span>
+                        <svg id="viewProfileVerifiedBadge" class="verified-badge-svg" style="display: none;" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    </div>
+                    <div id="viewProfileHandle" class="profile-handle">@username</div>
+                    <div id="viewProfileBio" class="profile-bio-text">Участник сообщества Kaspify.</div>
+
+                    <div class="profile-stats-bar">
+                        <div class="profile-stat-item">
+                            <span id="viewProfileStarsCount" class="profile-stat-num">0</span>
+                            <span class="profile-stat-label">Stars ⭐</span>
+                        </div>
+                        <div class="profile-stat-item">
+                            <span id="viewProfileGiftsCount" class="profile-stat-num">0</span>
+                            <span class="profile-stat-label">Подарков 🎁</span>
+                        </div>
+                        <div class="profile-stat-item">
+                            <span id="viewProfilePostsCount" class="profile-stat-num">0</span>
+                            <span class="profile-stat-label">Постов ✍️</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sub Navigation Tabs for User Profile Modal -->
+            <nav class="profile-nav-tabs" style="margin-top: 10px;">
+                <button id="viewUserTabPostsBtn" class="profile-tab-btn active" onclick="switchViewUserTab('posts')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    <span>Публикации</span>
+                </button>
+                <button id="viewUserTabGiftsBtn" class="profile-tab-btn" onclick="switchViewUserTab('gifts')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                    <span>Коллекция NFT</span>
+                </button>
+            </nav>
+
+            <div id="viewUserPostsContainer" class="posts-feed" style="padding: 12px 16px;"></div>
+            <div id="viewUserGiftsGrid" class="my-gifts-grid" style="display: none; padding: 12px 16px;"></div>
         </div>
     </div>
 </div>
@@ -4080,6 +4341,24 @@
         renderP2pMarketGrid();
         setInterval(fetchCloudPosts, 5000);
         setInterval(syncUserWithCloud, 4000);
+
+        // Auto-handle shared links (?u=username or ?post=id)
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetUser = urlParams.get('u') || urlParams.get('user');
+            const targetPost = urlParams.get('post');
+            if (targetUser) {
+                setTimeout(() => { viewUserProfile(targetUser); }, 350);
+            } else if (targetPost) {
+                setTimeout(() => {
+                    const postEl = document.getElementById(targetPost);
+                    if (postEl) {
+                        postEl.scrollIntoView({ behavior: 'smooth' });
+                        toggleCommentsSection(targetPost);
+                    }
+                }, 500);
+            }
+        } catch(e) {}
     });
 
     function initUsersDatabase() {
@@ -4357,15 +4636,42 @@
         document.getElementById('postImageInput').value = '';
     }
 
+    function mergePostsList(targetArray, sourceArray) {
+        const postMap = new Map();
+        (targetArray || []).forEach(p => { if (p && p.id) postMap.set(p.id, { ...p }); });
+        (sourceArray || []).forEach(incoming => {
+            if (!incoming || !incoming.id) return;
+            const existing = postMap.get(incoming.id);
+            if (!existing) {
+                postMap.set(incoming.id, { ...incoming });
+            } else {
+                const likes = Array.from(new Set([...(existing.likes || []), ...(incoming.likes || [])]));
+                const commentMap = new Map();
+                (existing.comments || []).forEach(c => { if (c && c.id) commentMap.set(c.id, c); });
+                (incoming.comments || []).forEach(c => { if (c && c.id) commentMap.set(c.id, c); });
+                const comments = Array.from(commentMap.values()).sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+
+                postMap.set(incoming.id, {
+                    ...incoming,
+                    ...existing,
+                    likes,
+                    comments,
+                    tipsStars: Math.max(existing.tipsStars || 0, incoming.tipsStars || 0)
+                });
+            }
+        });
+        const merged = Array.from(postMap.values());
+        merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        return merged;
+    }
+
     async function fetchCloudPosts() {
         try {
-            const localPosts = getPosts();
-            const postMap = new Map();
-            (localPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+            let current = getPosts();
 
             if (window.KaspifyCloud && window.KaspifyCloud.getPosts) {
                 const cloudPosts = await KaspifyCloud.getPosts();
-                (cloudPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+                current = mergePostsList(current, cloudPosts);
             }
 
             try {
@@ -4374,15 +4680,12 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     if (data && data.posts && Array.isArray(data.posts)) {
-                        data.posts.forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+                        current = mergePostsList(current, data.posts);
                     }
                 }
             } catch(e) {}
 
-            const merged = Array.from(postMap.values());
-            merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-            savePosts(merged);
+            savePosts(current);
             renderPostsFeed();
             renderUserPosts();
         } catch (e) {}
@@ -4397,14 +4700,10 @@
 
             const db = await KaspifyCloud.fetchDB();
             if (db) {
-                // 1. Синхронизируем посты
+                // 1. Синхронизируем посты с сохранением комментариев
                 if (db.posts && Array.isArray(db.posts)) {
                     const localPosts = getPosts();
-                    const postMap = new Map();
-                    (localPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
-                    (db.posts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
-                    const merged = Array.from(postMap.values());
-                    merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    const merged = mergePostsList(localPosts, db.posts);
                     savePosts(merged);
                     renderPostsFeed();
                 }
@@ -4468,6 +4767,7 @@
             text: text,
             media: composerAttachedImage,
             likes: [],
+            comments: [],
             reposts: 0,
             tipsStars: 0,
             createdAt: Date.now()
@@ -4538,14 +4838,146 @@
         container.innerHTML = posts.map(p => createPostHTML(p)).join('');
     }
 
+    function renderCommentsListHTML(post) {
+        const comments = post.comments || [];
+        if (comments.length === 0) {
+            return `<div class="empty-comments-hint">Комментариев пока нет. Будьте первым! 💬</div>`;
+        }
+        return comments.map(c => {
+            const cTime = formatTimeAgo(c.createdAt || Date.now());
+            const canDelete = currentUser && (c.authorUsername === currentUser.username || post.authorUsername === currentUser.username);
+            const authorHandle = escapeHTML(c.authorUsername || 'user');
+            return `
+                <div class="comment-item" id="comment_${c.id}">
+                    <img src="${c.authorAvatar || 'checklogo.png'}" class="comment-avatar" onclick="viewUserProfile('${authorHandle}')" title="Открыть профиль @${authorHandle}">
+                    <div class="comment-body">
+                        <div class="comment-header">
+                            <span class="comment-author-name" onclick="viewUserProfile('${authorHandle}')">
+                                ${escapeHTML(c.authorName || c.authorUsername)}
+                                ${c.authorVerified ? '<svg style="width:12px;height:12px;" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' : ''}
+                            </span>
+                            <span class="comment-handle">@${authorHandle}</span>
+                            <span class="comment-time">• ${cTime}</span>
+                            ${canDelete ? `<button class="comment-delete-btn" onclick="deletePostComment('${post.id}', '${c.id}')" title="Удалить комментарий">✕</button>` : ''}
+                        </div>
+                        <div class="comment-text">${escapeHTML(c.text)}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function toggleCommentsSection(postId) {
+        const sec = document.getElementById(`commentsSection_${postId}`);
+        if (!sec) return;
+        if (sec.style.display === 'none' || !sec.style.display) {
+            sec.style.display = 'flex';
+            setTimeout(() => {
+                const input = document.getElementById(`commentInput_${postId}`);
+                if (input) input.focus();
+            }, 100);
+        } else {
+            sec.style.display = 'none';
+        }
+    }
+
+    async function submitPostComment(postId) {
+        if (!currentUser) {
+            if (window.KaspifyDB && window.KaspifyDB.openAuthModal) {
+                window.KaspifyDB.openAuthModal(true);
+            } else {
+                showToast("Сначала войдите в аккаунт");
+            }
+            return;
+        }
+
+        const input = document.getElementById(`commentInput_${postId}`);
+        if (!input) return;
+        const text = input.value.trim();
+        if (!text) return;
+
+        const newComment = {
+            id: 'cmt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+            authorUsername: currentUser.username,
+            authorName: currentUser.fullname || currentUser.username,
+            authorAvatar: currentUser.avatar || 'checklogo.png',
+            authorVerified: currentUser.verified === true,
+            text: text,
+            createdAt: Date.now()
+        };
+
+        const posts = getPosts();
+        const post = posts.find(p => p.id === postId);
+        if (!post) return;
+
+        if (!post.comments) post.comments = [];
+        post.comments.push(newComment);
+        savePosts(posts);
+
+        input.value = '';
+
+        const listEl = document.getElementById(`commentsList_${postId}`);
+        if (listEl) listEl.innerHTML = renderCommentsListHTML(post);
+
+        const countBadge = document.querySelector(`#${postId} .comment-count-badge`);
+        if (countBadge) countBadge.textContent = post.comments.length;
+
+        showToast("Комментарий добавлен 💬");
+
+        if (window.KaspifyCloud && window.KaspifyCloud.addComment) {
+            await KaspifyCloud.addComment(postId, newComment);
+        }
+
+        try {
+            const apiBase = getApiBase();
+            fetch(`${apiBase}/posts/comment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, comment: newComment })
+            }).catch(() => {});
+        } catch(e) {}
+    }
+
+    async function deletePostComment(postId, commentId) {
+        const posts = getPosts();
+        const post = posts.find(p => p.id === postId);
+        if (!post || !post.comments) return;
+
+        post.comments = post.comments.filter(c => c.id !== commentId);
+        savePosts(posts);
+
+        const listEl = document.getElementById(`commentsList_${postId}`);
+        if (listEl) listEl.innerHTML = renderCommentsListHTML(post);
+
+        const countBadge = document.querySelector(`#${postId} .comment-count-badge`);
+        if (countBadge) countBadge.textContent = post.comments.length;
+
+        showToast("Комментарий удалён");
+
+        if (window.KaspifyCloud && window.KaspifyCloud.deleteComment) {
+            await KaspifyCloud.deleteComment(postId, commentId);
+        }
+
+        try {
+            const apiBase = getApiBase();
+            fetch(`${apiBase}/posts/comment/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, commentId })
+            }).catch(() => {});
+        } catch(e) {}
+    }
+
     function createPostHTML(post) {
         const isLiked = currentUser && post.likes && post.likes.includes(currentUser.username);
         const timeAgo = formatTimeAgo(post.createdAt);
+        const commentsCount = (post.comments || []).length;
+        const authorUsernameEscaped = escapeHTML(post.authorUsername || 'user');
 
         return `
             <article class="post-card" id="${post.id}">
                 <div class="post-header">
-                    <div class="post-author-group">
+                    <div class="post-author-group" style="cursor: pointer;" onclick="viewUserProfile('${authorUsernameEscaped}')" title="Открыть профиль @${authorUsernameEscaped}">
                         <img src="${post.authorAvatar || 'checklogo.png'}" class="post-author-avatar">
                         <div class="post-author-info">
                             <div class="post-author-name">
@@ -4553,15 +4985,13 @@
                                 ${post.authorVerified ? '<svg style="width:14px;height:14px;" viewBox="0 0 24 24" fill="#38bdf8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' : ''}
                             </div>
                             <div class="post-author-handle" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
-                                <span>@${escapeHTML(post.authorUsername)}</span>
+                                <span>@${authorUsernameEscaped}</span>
                                 <span style="font-size: 10px; font-weight: 800; color: #38bdf8; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 1px 5px;">🏷️ NFT</span>
                                 <span>• ${timeAgo}</span>
                             </div>
                         </div>
                     </div>
-                     <button class="post-action-btn" onclick="sharePost('${post.id}')">
-                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                     </button>                ${currentUser && post.authorUsername === currentUser.username ? `
+                    ${currentUser && post.authorUsername === currentUser.username ? `
                         <button class="modal-close-btn" onclick="deletePost('${post.id}')" title="Удалить пост">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         </button>
@@ -4572,17 +5002,34 @@
                 ${post.media ? `<img src="${post.media}" class="post-media-image">` : ''}
 
                 <div class="post-footer-actions">
-                    <button class="post-action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLikePost('${post.id}')">
+                    <button class="post-action-btn ${isLiked ? 'liked' : ''}" onclick="toggleLikePost('${post.id}')" title="Нравится">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="${isLiked ? '#ef4444' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         <span>${(post.likes || []).length}</span>
                     </button>
-                    <button class="post-action-btn" onclick="tipAuthorStars('${post.authorUsername}')">
+                    <button class="post-action-btn" onclick="toggleCommentsSection('${post.id}')" title="Комментарии">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                        <span class="comment-count-badge">${commentsCount}</span>
+                    </button>
+                    <button class="post-action-btn" onclick="tipAuthorStars('${post.authorUsername}')" title="Отправить чаевые Stars">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                         <span>${post.tipsStars || 0} ⭐</span>
                     </button>
-                                        <button class="post-action-btn" onclick="sharePost('${post.id}')">
+                    <button class="post-action-btn" onclick="sharePost('${post.id}')" title="Поделиться">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                     </button>
+                </div>
+
+                <div class="post-comments-section" id="commentsSection_${post.id}" style="display: none;">
+                    <div class="comments-list" id="commentsList_${post.id}">
+                        ${renderCommentsListHTML(post)}
+                    </div>
+                    <div class="comment-composer-box">
+                        <img src="${(currentUser && currentUser.avatar) || 'checklogo.png'}" class="comment-avatar" style="width:28px;height:28px;">
+                        <input type="text" class="comment-input" id="commentInput_${post.id}" placeholder="Написать комментарий..." onkeydown="if(event.key==='Enter') submitPostComment('${post.id}')">
+                        <button class="comment-send-btn" onclick="submitPostComment('${post.id}')" title="Отправить комментарий">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </div>
                 </div>
             </article>
         `;
@@ -4647,17 +5094,14 @@
 
     // Share a post using Web Share API or fallback to copy URL
     async function sharePost(postId) {
-        // Build a link to the frontend page, not the API
         const origin = window.location.origin || 'https://copykaspify.onrender.com';
         const page = window.location.pathname || '/profile.html';
         const shareUrl = `${origin}${page}?post=${postId}`;
         if (navigator.share) {
             try {
                 await navigator.share({ title: 'Пост в Kaspify', url: shareUrl });
-                return; // user shared successfully
-            } catch (err) {
-                // user cancelled or error — fall through to copy
-            }
+                return;
+            } catch (err) {}
         }
         copyToClipboard(shareUrl);
         showToast('Ссылка на пост скопирована ✅');
@@ -4685,6 +5129,169 @@
         renderPostsFeed();
         renderUserPosts();
         showToast("Пост удалён");
+    }
+
+    /* ======================================================== */
+    /* VIEW OTHER USER PROFILE                                  */
+    /* ======================================================== */
+    let viewingProfileUsername = null;
+
+    async function viewUserProfile(targetUsername) {
+        if (!targetUsername) return;
+        const cleanHandle = targetUsername.toLowerCase().replace(/^@/, '');
+
+        // If viewing own profile, switch to profile tab
+        if (currentUser && currentUser.username && currentUser.username.toLowerCase() === cleanHandle) {
+            closeModal('viewUserProfileModal');
+            switchScreen('profile');
+            return;
+        }
+
+        viewingProfileUsername = cleanHandle;
+
+        const users = getAllUsers();
+        let user = users.find(u => u.username && u.username.toLowerCase() === cleanHandle);
+
+        const allPosts = getPosts();
+        const userPosts = allPosts.filter(p => p.authorUsername && p.authorUsername.toLowerCase() === cleanHandle);
+
+        if (!user) {
+            const samplePost = userPosts[0];
+            user = {
+                username: cleanHandle,
+                fullname: (samplePost && samplePost.authorName) || cleanHandle,
+                avatar: (samplePost && samplePost.authorAvatar) || 'checklogo.png',
+                verified: (samplePost && samplePost.authorVerified) || false,
+                stars: 0,
+                bio: `Профиль пользователя @${cleanHandle} в Kaspify ✨`,
+                nfts: [],
+                banner: null
+            };
+        }
+
+        const avatarEl = document.getElementById('viewProfileAvatarImg');
+        if (avatarEl) avatarEl.src = user.avatar || 'checklogo.png';
+
+        const bannerEl = document.getElementById('viewProfileCoverBanner');
+        if (bannerEl) {
+            if (user.banner) {
+                bannerEl.style.backgroundImage = `url(${user.banner})`;
+            } else {
+                bannerEl.style.backgroundImage = 'none';
+            }
+        }
+
+        const nameEl = document.getElementById('viewProfileDisplayName');
+        if (nameEl) nameEl.textContent = user.fullname || cleanHandle;
+
+        const verifiedEl = document.getElementById('viewProfileVerifiedBadge');
+        if (verifiedEl) verifiedEl.style.display = user.verified ? 'inline-block' : 'none';
+
+        const handleEl = document.getElementById('viewProfileHandle');
+        if (handleEl) handleEl.textContent = '@' + cleanHandle;
+
+        const bioEl = document.getElementById('viewProfileBio');
+        if (bioEl) bioEl.textContent = user.bio || `Профиль @${cleanHandle} в Kaspify`;
+
+        const starsEl = document.getElementById('viewProfileStarsCount');
+        if (starsEl) starsEl.textContent = user.stars || 0;
+
+        const giftsEl = document.getElementById('viewProfileGiftsCount');
+        if (giftsEl) giftsEl.textContent = (user.nfts || []).length;
+
+        const postsCountEl = document.getElementById('viewProfilePostsCount');
+        if (postsCountEl) postsCountEl.textContent = userPosts.length;
+
+        const postsContainer = document.getElementById('viewUserPostsContainer');
+        if (postsContainer) {
+            if (userPosts.length === 0) {
+                postsContainer.innerHTML = `
+                    <div class="empty-feed-placeholder" style="padding: 30px 16px;">
+                        <div style="font-size: 36px; margin-bottom: 8px;">✍️</div>
+                        <div style="color: #fff; font-weight: 700; font-size: 14px;">У пользователя пока нет публикаций</div>
+                    </div>
+                `;
+            } else {
+                postsContainer.innerHTML = userPosts.map(p => createPostHTML(p)).join('');
+            }
+        }
+
+        const giftsContainer = document.getElementById('viewUserGiftsGrid');
+        if (giftsContainer) {
+            const nfts = user.nfts || [];
+            if (nfts.length === 0) {
+                giftsContainer.innerHTML = `
+                    <div class="empty-feed-placeholder" style="padding: 30px 16px; grid-column: 1 / -1;">
+                        <div style="font-size: 36px; margin-bottom: 8px;">🎁</div>
+                        <div style="color: #fff; font-weight: 700; font-size: 14px;">У пользователя пока нет подарков и NFT</div>
+                    </div>
+                `;
+            } else {
+                giftsContainer.innerHTML = nfts.map(nft => `
+                    <div class="my-gift-card" style="background: ${nft.backdrop || 'var(--tg-surface-elevated)'};">
+                        <img src="${nft.img || 'checklogo.png'}" class="my-gift-img">
+                        <div class="my-gift-title">${escapeHTML(nft.name || 'NFT')}</div>
+                        <div class="my-gift-serial">${escapeHTML(nft.serial || nft.id || '')}</div>
+                        <div class="nft-rarity-pill ${nft.rarity || 'rare'}" style="margin-top: 4px; font-size: 9px; padding: 2px 6px;">
+                            ${(nft.rarity || 'rare').toUpperCase()}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        switchViewUserTab('posts');
+        openModal('viewUserProfileModal');
+
+        try {
+            const apiBase = getApiBase();
+            const resp = await fetch(`${apiBase}/user/${cleanHandle}`);
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.user) {
+                    if (starsEl && data.user.stars !== undefined) starsEl.textContent = data.user.stars;
+                    if (verifiedEl && data.user.verified !== undefined) verifiedEl.style.display = data.user.verified ? 'inline-block' : 'none';
+                    if (giftsEl && Array.isArray(data.user.nfts)) giftsEl.textContent = data.user.nfts.length;
+                }
+            }
+        } catch(e) {}
+    }
+
+    function switchViewUserTab(tabName) {
+        const tabPostsBtn = document.getElementById('viewUserTabPostsBtn');
+        const tabGiftsBtn = document.getElementById('viewUserTabGiftsBtn');
+        const subviewPosts = document.getElementById('viewUserPostsContainer');
+        const subviewGifts = document.getElementById('viewUserGiftsGrid');
+
+        if (tabName === 'posts') {
+            if (tabPostsBtn) tabPostsBtn.classList.add('active');
+            if (tabGiftsBtn) tabGiftsBtn.classList.remove('active');
+            if (subviewPosts) subviewPosts.style.display = 'flex';
+            if (subviewGifts) subviewGifts.style.display = 'none';
+        } else {
+            if (tabPostsBtn) tabPostsBtn.classList.remove('active');
+            if (tabGiftsBtn) tabGiftsBtn.classList.add('active');
+            if (subviewPosts) subviewPosts.style.display = 'none';
+            if (subviewGifts) subviewGifts.style.display = 'grid';
+        }
+    }
+
+    function tipViewedUserStars() {
+        if (!viewingProfileUsername) return;
+        tipAuthorStars(viewingProfileUsername);
+    }
+
+    function shareViewedUserProfile() {
+        if (!viewingProfileUsername) return;
+        const origin = window.location.origin || 'https://copykaspify.onrender.com';
+        const page = window.location.pathname || '/profile.html';
+        const shareUrl = `${origin}${page}?u=${viewingProfileUsername}`;
+        if (navigator.share) {
+            navigator.share({ title: `Профиль @${viewingProfileUsername} в Kaspify`, url: shareUrl }).catch(() => {});
+            return;
+        }
+        copyToClipboard(shareUrl);
+        showToast(`Ссылка на профиль @${viewingProfileUsername} скопирована ✅`);
     }
 
     /* ======================================================== */
@@ -5174,7 +5781,7 @@
                     </div>
                     <div class="nft-card-body">
                         <div class="nft-title">${item.name}</div>
-                        <div class="nft-variation-tag">${item.variation || 'Подарок'} • Продавец: @${item.seller}</div>
+                        <div class="nft-variation-tag">${item.variation || 'Подарок'} • Продавец: <span onclick="event.stopPropagation(); viewUserProfile('${escapeHTML(item.seller || 'user')}')" style="cursor: pointer; color: var(--tg-primary); text-decoration: underline;">@${escapeHTML(item.seller || 'user')}</span></div>
                         <div class="nft-price-row">
                             <span class="nft-price-stars">${item.salePrice} Stars</span>
                         </div>
@@ -5198,7 +5805,8 @@
         document.getElementById('p2pModalPreview').style.background = item.backdrop || 'radial-gradient(circle at 50% 35%, var(--tg-surface-elevated) 0%, var(--tg-surface) 60%, var(--tg-bg) 100%)';
         document.getElementById('p2pModalName').textContent = item.name;
         document.getElementById('p2pModalVariation').textContent = `${item.variation || ''} • ${item.serial}`;
-        document.getElementById('p2pModalSeller').textContent = `Продавец: @${item.seller}`;
+        const sellerEl = document.getElementById('p2pModalSeller');
+        sellerEl.innerHTML = `Продавец: <span style="text-decoration: underline; cursor: pointer;" onclick="viewUserProfile('${escapeHTML(item.seller || 'user')}')">@${escapeHTML(item.seller || 'user')}</span>`;
 
         const rarityEl = document.getElementById('p2pModalRarity');
         rarityEl.textContent = item.upgraded ? 'NFT' : rarityRu(item.rarity);

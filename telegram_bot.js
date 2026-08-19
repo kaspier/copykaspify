@@ -223,6 +223,22 @@ async function handleMessage(message) {
           else p.likes.push(cleanU);
           saveDB(db);
         }
+      } else if (data.type === 'ADD_COMMENT' && data.postId && data.comment) {
+        const p = db.posts.find(x => x.id === data.postId);
+        if (p) {
+          if (!p.comments) p.comments = [];
+          if (!p.comments.some(c => c.id === data.comment.id)) {
+            p.comments.push(data.comment);
+            saveDB(db);
+            console.log(`[SYNC] Новый комментарий от @${data.comment.authorUsername} к посту ${data.postId}`);
+          }
+        }
+      } else if (data.type === 'DELETE_COMMENT' && data.postId && data.commentId) {
+        const p = db.posts.find(x => x.id === data.postId);
+        if (p && p.comments) {
+          p.comments = p.comments.filter(c => c.id !== data.commentId);
+          saveDB(db);
+        }
       } else if (data.type === 'P2P_LIST' && data.item) {
         db.p2p = db.p2p.filter(x => x.id !== data.item.id);
         db.p2p.unshift(data.item);
@@ -967,6 +983,39 @@ const server = http.createServer((req, res) => {
       }
       res.writeHead(404);
       return res.end(JSON.stringify({ error: 'Post not found' }));
+    }
+
+    if (req.url === '/api/posts/comment' && req.method === 'POST') {
+      const { postId, comment } = body;
+      const db = loadDB();
+      if (!db.posts) db.posts = [];
+      const p = db.posts.find(x => x.id === postId);
+      if (p) {
+        if (!p.comments) p.comments = [];
+        if (!p.comments.some(c => c.id === comment.id)) {
+          p.comments.push(comment);
+        }
+        saveDB(db);
+        res.writeHead(200);
+        return res.end(JSON.stringify({ success: true, comments: p.comments }));
+      }
+      res.writeHead(404);
+      return res.end(JSON.stringify({ error: 'Post not found' }));
+    }
+
+    if (req.url === '/api/posts/comment/delete' && req.method === 'POST') {
+      const { postId, commentId } = body;
+      const db = loadDB();
+      if (!db.posts) db.posts = [];
+      const p = db.posts.find(x => x.id === postId);
+      if (p && p.comments) {
+        p.comments = p.comments.filter(c => c.id !== commentId);
+        saveDB(db);
+        res.writeHead(200);
+        return res.end(JSON.stringify({ success: true, comments: p.comments }));
+      }
+      res.writeHead(404);
+      return res.end(JSON.stringify({ error: 'Post or comment not found' }));
     }
 
     // --- REQUEST VERIFICATION FROM WEB SITE ---

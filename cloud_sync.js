@@ -129,6 +129,30 @@ window.KaspifyCloud = (function() {
     await sendSyncMessage({ type: 'LIKE_POST', postId, username });
   }
 
+  async function addComment(postId, comment) {
+    if (!postId || !comment) return;
+    try {
+      await fetch(`${API_BASE}/posts/comment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, comment })
+      });
+    } catch(e) {}
+    await sendSyncMessage({ type: 'ADD_COMMENT', postId, comment });
+  }
+
+  async function deleteComment(postId, commentId) {
+    if (!postId || !commentId) return;
+    try {
+      await fetch(`${API_BASE}/posts/comment/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, commentId })
+      });
+    } catch(e) {}
+    await sendSyncMessage({ type: 'DELETE_COMMENT', postId, commentId });
+  }
+
   // === P2P МАРКЕТ NFT ===
   async function getP2P() {
     const db = await fetchDB();
@@ -195,7 +219,7 @@ window.KaspifyCloud = (function() {
   return {
     fetchDB,
     getUsers, getUser, saveUser,
-    getPosts, addPost, toggleLike,
+    getPosts, addPost, toggleLike, addComment, deleteComment,
     getP2P, listP2pItem, delistP2pItem, buyP2pItem,
     getUsernames, buyUsername,
     heartbeat, getOnlineUsers
