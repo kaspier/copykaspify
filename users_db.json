@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "username": "patexr",
+      "fullname": "patexr",
+      "stars": 10000000,
+      "balance": 10000,
+      "verified": false
+    }
+  ],
+  "online": {}
+}

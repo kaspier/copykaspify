@@ -708,6 +708,90 @@ const server = http.createServer((req, res) => {
       return res.end(JSON.stringify({ success: true }));
     }
 
+    // --- GLOBAL USERS & STATS ---
+    if (req.url === '/api/users' && req.method === 'GET') {
+      const db = loadDB();
+      res.writeHead(200);
+      return res.end(JSON.stringify({ success: true, users: db.users || [] }));
+    }
+
+    // --- GLOBAL POSTS & FEED ---
+    if (req.url === '/api/posts' && req.method === 'GET') {
+      const db = loadDB();
+      res.writeHead(200);
+      return res.end(JSON.stringify({ success: true, posts: db.posts || [] }));
+    }
+
+    if (req.url === '/api/posts' && req.method === 'POST') {
+      const db = loadDB();
+      if (!db.posts) db.posts = [];
+      const newPost = {
+        id: body.id || 'post_' + Date.now(),
+        authorId: body.authorId || body.authorUsername,
+        authorName: body.authorName || body.authorUsername,
+        authorUsername: (body.authorUsername || '').toLowerCase().replace(/^@/, ''),
+        authorAvatar: body.authorAvatar || 'checklogo.png',
+        authorVerified: body.authorVerified === true,
+        text: body.text || '',
+        media: body.media || null,
+        likes: body.likes || [],
+        reposts: 0,
+        tipsStars: 0,
+        createdAt: body.createdAt || Date.now()
+      };
+      db.posts.unshift(newPost);
+      // Keep last 100 posts
+      if (db.posts.length > 100) db.posts = db.posts.slice(0, 100);
+      saveDB(db);
+
+      res.writeHead(200);
+      return res.end(JSON.stringify({ success: true, post: newPost, posts: db.posts }));
+    }
+
+    if (req.url === '/api/posts/like' && req.method === 'POST') {
+      const { postId, username } = body;
+      const cleanU = (username || '').toLowerCase().replace(/^@/, '');
+      const db = loadDB();
+      if (!db.posts) db.posts = [];
+      const p = db.posts.find(x => x.id === postId);
+      if (p) {
+        if (!p.likes) p.likes = [];
+        const idx = p.likes.indexOf(cleanU);
+        if (idx !== -1) p.likes.splice(idx, 1);
+        else p.likes.push(cleanU);
+        saveDB(db);
+        res.writeHead(200);
+        return res.end(JSON.stringify({ success: true, likes: p.likes }));
+      }
+      res.writeHead(404);
+      return res.end(JSON.stringify({ error: 'Post not found' }));
+    }
+
+    // --- REQUEST VERIFICATION FROM WEB SITE ---
+    if (req.url === '/api/verify-request' && req.method === 'POST') {
+      const { username, fullname } = body;
+      const cleanU = (username || '').toLowerCase().replace(/^@/, '');
+      sendTelegramRequest('sendMessage', {
+        chat_id: ADMIN_ID,
+        text: `🔔 <b>Новая заявка на верификацию с сайта!</b>\n\n` +
+          `👤 Пользователь: <b>${fullname || cleanU}</b>\n` +
+          `🏷️ Никнейм: <b>@${cleanU}</b>\n\n` +
+          `Одобрить выдачу синей галочки?`,
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: '✅ Одобрить галочку', callback_data: `verify_${cleanU}_1` },
+              { text: '❌ Отклонить', callback_data: `verify_${cleanU}_0` }
+            ]
+          ]
+        }
+      }).catch(() => {});
+
+      res.writeHead(200);
+      return res.end(JSON.stringify({ success: true, message: 'Заявка отправлена администратору' }));
+    }
+
     res.writeHead(404);
     res.end(JSON.stringify({ error: 'Route not found' }));
   });

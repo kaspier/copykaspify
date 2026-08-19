@@ -4040,8 +4040,10 @@
         initUsersDatabase();
         loadActiveUser();
         renderPostsFeed();
+        fetchCloudPosts();
         renderMarketGrid('all');
         renderP2pMarketGrid();
+        setInterval(fetchCloudPosts, 5000);
     });
 
     function initUsersDatabase() {
@@ -4238,6 +4240,27 @@
         document.getElementById('postImageInput').value = '';
     }
 
+    function getApiBase() {
+        return (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
+            ? 'http://localhost:8888/api' 
+            : 'https://kaspify-api.loca.lt/api';
+    }
+
+    async function fetchCloudPosts() {
+        try {
+            const resp = await fetch(`${getApiBase()}/posts`, {
+                headers: { 'bypass-tunnel-reminder': 'true' }
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                if (data && data.posts && Array.isArray(data.posts)) {
+                    savePosts(data.posts);
+                    renderPostsFeed();
+                }
+            }
+        } catch (e) {}
+    }
+
     function publishNewPost() {
         if (!currentUser) {
             KaspifyDB.openAuthModal(true);
@@ -4254,10 +4277,10 @@
 
         const newPost = {
             id: "post_" + Date.now(),
-            authorId: currentUser.id,
-            authorName: currentUser.fullname,
-            authorUsername: currentUser.username,
-            authorAvatar: currentUser.avatar,
+            authorId: currentUser.id || currentUser.username,
+            authorName: currentUser.fullname || currentUser.username,
+            authorUsername: (currentUser.username || '').toLowerCase().replace(/^@/, ''),
+            authorAvatar: currentUser.avatar || 'checklogo.png',
             authorVerified: currentUser.verified === true,
             text: text,
             media: composerAttachedImage,
@@ -4271,10 +4294,17 @@
         posts.unshift(newPost);
         savePosts(posts);
 
+        // Отправка в глобальное облако Kaspify API
+        fetch(`${getApiBase()}/posts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'bypass-tunnel-reminder': 'true' },
+            body: JSON.stringify(newPost)
+        }).catch(() => {});
+
         textInput.value = '';
         clearComposerMedia();
         renderPostsFeed();
-        showToast("Пост успешно опубликован! 🚀");
+        showToast("Пост успешно опубликован для всех! 🚀");
     }
 
     function renderPostsFeed() {
@@ -4287,7 +4317,7 @@
                 <div class="empty-feed-placeholder">
                     <div class="empty-feed-icon">📭</div>
                     <h3 style="font-size: 16px; font-weight: 700; color: #fff;">В ленте пока нет постов</h3>
-                    <p style="font-size: 13px; margin-top: 4px;">Будьте первым, кто опубликует запись в ленту!</p>
+                    <p style="font-size: 13px; margin-top: 4px;">Будьте первым, кто опубликует запись в общую ленту!</p>
                 </div>
             `;
             return;
