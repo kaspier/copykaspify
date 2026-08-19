@@ -16,10 +16,7 @@ bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML")
 DATA_FILE = os.path.join(os.path.dirname(__file__), "bot_data.json")
 
 # Default registered Kaspify accounts
-DEFAULT_KASPIFY_USERS = {
-    "ivan_kaspi": {"fullname": "Иван Иванов", "stars": 100000},
-    "alice_ton": {"fullname": "Алиса Павлова", "stars": 100000}
-}
+DEFAULT_KASPIFY_USERS = {}
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -101,7 +98,7 @@ def prompt_kaspify_username(call):
     msg = bot.send_message(
         call.message.chat.id,
         "🔍 <b>Введите ваш Kaspify @username для проверки</b>:\n\n"
-        "<i>Например: <code>ivan_kaspi</code> или <code>alice_ton</code></i>"
+        "<i>Например: <code>user</code> или <code>my_username</code></i>"
     )
     bot.register_next_step_handler(msg, process_username_check)
 
@@ -205,8 +202,7 @@ def handle_give_stars(message):
             message,
             "⚠️ <b>Формат команды:</b>\n"
             "<code>/give <username_из_kaspify> <количество></code>\n\n"
-            "Пример: <code>/give ivan_kaspi 100000</code>\n"
-            "Пример: <code>/give @alice_ton 50000</code>"
+            "Пример: <code>/give username 100000</code>"
         )
         return
     
@@ -245,7 +241,7 @@ def handle_admin_panel(message):
     bot.send_message(
         message.chat.id,
         "👑 <b>Панель администратора Kaspify</b>\n\n"
-        "• <code>/give ivan_kaspi 100000</code> — выдать звёзды пользователю Kaspify\n"
+        "• <code>/give username 100000</code> — выдать звёзды пользователю Kaspify\n"
         "• <code>/stats</code> — статистика пользователей",
         reply_markup=markup
     )
@@ -291,7 +287,7 @@ def handle_callback(call):
         bot.send_message(
             call.message.chat.id,
             "✍️ <b>Для начисления звёзд введите:</b>\n\n"
-            "<code>/give ivan_kaspi 100000</code>"
+            "<code>/give username 100000</code>"
         )
 
     elif call.data == "admin_stats":

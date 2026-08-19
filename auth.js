@@ -346,10 +346,10 @@ window.KaspifyDB = (function() {
 
           <form onsubmit="KaspifyDB.handleCompleteProfile(event)">
             <div class="auth-input-label" style="color: #94a3b8; font-size: 12px; margin-bottom: 4px;">ФИО (Имя и Фамилия)</div>
-            <input type="text" id="supercell-fullname" class="supercell-input" placeholder="Алихан Смагулов" required style="margin-bottom: 12px;">
+            <input type="text" id="supercell-fullname" class="supercell-input" placeholder="Имя Фамилия" required style="margin-bottom: 12px;">
 
             <div class="auth-input-label" style="color: #94a3b8; font-size: 12px; margin-bottom: 4px;">Юзернейм (@username)</div>
-            <input type="text" id="supercell-username" class="supercell-input" placeholder="alikhan_kz" required style="margin-bottom: 16px;">
+            <input type="text" id="supercell-username" class="supercell-input" placeholder="username" required style="margin-bottom: 16px;">
 
             <button type="submit" class="supercell-btn">
               Зарегистрироваться 🎉

@@ -185,9 +185,7 @@ function changePaymentSum() {
 }
 
 function openConfirmModal() {
-    const vendorEl = document.getElementById("edit-vendor");
-    const amountEl = document.getElementById("edit-amount");
-    const vendor = vendorEl ? vendorEl.value : "ИП КУЗНЕЦОВА В.О.";
+    const vendor = vendorEl ? vendorEl.value : "Продавец";
     const amount = amountEl ? amountEl.innerText : "100 ₸";
 
     const modalVendor = document.getElementById("modal-vendor-name");
@@ -258,10 +256,7 @@ function goHome() {
 }
 
 function openPayment() {
-    const editVendor = document.getElementById("edit-vendor");
-    const editAmount = document.getElementById("edit-amount");
-
-    const vendorInput = editVendor ? editVendor.value : "ИП КУЗНЕЦОВА В.О.";
+    const vendorInput = editVendor ? editVendor.value : "Продавец";
     const amountVal = editAmount ? editAmount.innerText : "100 ₸";
 
     const modalVendor = document.getElementById("modal-vendor-name");
@@ -502,17 +497,17 @@ function updateReceipt() {
 
     const cleanAmount = amount.replace(' ₸', '').replace(' Т', '');
 
-    if (document.getElementById("receipt-vendor-name")) document.getElementById("receipt-vendor-name").innerText = schoolEl ? schoolEl.value : "Столовая Гимназия 45";
-    if (document.getElementById("receipt-ip")) document.getElementById("receipt-ip").innerText = ipEl ? ipEl.value : "ИП Кузнецова В.О.";
+    if (document.getElementById("receipt-vendor-name")) document.getElementById("receipt-vendor-name").innerText = schoolEl ? schoolEl.value : "Столовая";
+    if (document.getElementById("receipt-ip")) document.getElementById("receipt-ip").innerText = ipEl ? ipEl.value : "ИП Продавец";
     if (document.getElementById("receipt-amount")) document.getElementById("receipt-amount").innerText = amount;
-    if (document.getElementById("receipt-item-name")) document.getElementById("receipt-item-name").innerText = itemEl ? itemEl.value : "Горячее питание";
+    if (document.getElementById("receipt-item-name")) document.getElementById("receipt-item-name").innerText = itemEl ? itemEl.value : "Оплата услуг";
     if (document.getElementById("receipt-item-quantity")) document.getElementById("receipt-item-quantity").innerText = `1 шт. x ${cleanAmount} ₸`;
     if (document.getElementById("receipt-item-price")) document.getElementById("receipt-item-price").innerText = `${cleanAmount} ₸`;
     if (document.getElementById("receipt-check-no")) document.getElementById("receipt-check-no").innerText = 'QR' + generateRandomNumber(10);
     if (document.getElementById("receipt-date")) document.getElementById("receipt-date").innerText = `${dateStr} ${timeStr}`;
-    if (document.getElementById("receipt-address")) document.getElementById("receipt-address").innerText = addrEl ? addrEl.value : "г. Караганда, Бухар-Жырау, 72a";
+    if (document.getElementById("receipt-address")) document.getElementById("receipt-address").innerText = addrEl ? addrEl.value : "г. Алматы";
     if (document.getElementById("receipt-iin")) document.getElementById("receipt-iin").innerText = iinEl ? iinEl.value : "930429450237";
-    if (document.getElementById("receipt-fio")) document.getElementById("receipt-fio").innerText = fioEl ? fioEl.value : "Иван Д.";
+    if (document.getElementById("receipt-fio")) document.getElementById("receipt-fio").innerText = fioEl ? fioEl.value : "Покупатель";
     if (document.getElementById("receipt-rnm")) document.getElementById("receipt-rnm").innerText = '01' + generateRandomNumber(11);
     if (document.getElementById("receipt-znm")) document.getElementById("receipt-znm").innerText = 'KK' + generateRandomNumber(9);
     if (document.getElementById("receipt-fp")) document.getElementById("receipt-fp").innerText = generateRandomNumber(12);
@@ -920,16 +915,7 @@ function shareProfile() {
 }
 
 // ===== PROFILE WALL (РОСПИСИ НА СТЕНЕ) =====
-const SAMPLE_WALL_POSTS = [
-    {
-        id: 'post_2',
-        authorName: 'Диана К.',
-        authorUsername: 'diana_k',
-        authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80',
-        text: 'Спасибо за быстрый перевод! 💖',
-        timestamp: Date.now() - 86400000
-    }
-];
+const SAMPLE_WALL_POSTS = [];
 
 function getWallPosts(username) {
     try {
@@ -1185,11 +1171,7 @@ function renderStats(period = '3days') {
                 item.className = 'statement-item';
                 item.style.cursor = 'pointer';
                 item.onclick = () => {
-                    if (tx.category === 'Переводы') {
-                        openUserProfile('alikhan_kz');
-                    } else {
-                        showToast(`Операция: ${tx.name}`);
-                    }
+                    showToast(`Операция: ${tx.name}`);
                 };
                 item.innerHTML = `
                     <div class="statement-icon ${tx.category === 'Переводы' ? 'icon-bg-blue' : 'icon-bg-red'}">
