@@ -4348,21 +4348,34 @@
 
     async function fetchCloudPosts() {
         try {
-            if (window.KaspifyCloud) {
+            const localPosts = getPosts();
+            const postMap = new Map();
+            (localPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+
+            if (window.KaspifyCloud && window.KaspifyCloud.getPosts) {
                 const cloudPosts = await KaspifyCloud.getPosts();
-                const localPosts = getPosts();
-                
-                const postMap = new Map();
-                (localPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
                 (cloudPosts || []).forEach(p => { if (p && p.id) postMap.set(p.id, p); });
-                
-                const merged = Array.from(postMap.values());
-                merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                
-                savePosts(merged);
-                renderPostsFeed();
-                renderUserPosts();
             }
+
+            try {
+                const apiBase = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
+                    ? 'http://localhost:8888/api' 
+                    : '/api';
+                const resp = await fetch(`${apiBase}/posts`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data && data.posts && Array.isArray(data.posts)) {
+                        data.posts.forEach(p => { if (p && p.id) postMap.set(p.id, p); });
+                    }
+                }
+            } catch(e) {}
+
+            const merged = Array.from(postMap.values());
+            merged.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            savePosts(merged);
+            renderPostsFeed();
+            renderUserPosts();
         } catch (e) {}
     }
 
@@ -4458,13 +4471,25 @@
         textInput.value = '';
         clearComposerMedia();
         renderPostsFeed();
-        showToast("Пост опубликован для всех пользователей! 🚀");
+        renderUserPosts();
 
         // Глобальная публикация в облако
-        if (window.KaspifyCloud) {
+        if (window.KaspifyCloud && window.KaspifyCloud.addPost) {
             await KaspifyCloud.addPost(newPost);
-            await fetchCloudPosts();
         }
+
+        try {
+            const apiBase = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
+                ? 'http://localhost:8888/api' 
+                : '/api';
+            fetch(`${apiBase}/posts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newPost)
+            }).catch(() => {});
+        } catch(e) {}
+
+        showToast("Пост опубликован для всех пользователей! 🚀");
     }
 
     function renderPostsFeed() {
@@ -4572,10 +4597,20 @@
         renderPostsFeed();
         renderUserPosts();
 
-        if (window.KaspifyCloud) {
+        if (window.KaspifyCloud && window.KaspifyCloud.toggleLike) {
             await KaspifyCloud.toggleLike(postId, currentUser.username);
-            await fetchCloudPosts();
         }
+
+        try {
+            const apiBase = (window.location.hostname === 'localhost' || window.location.protocol === 'file:') 
+                ? 'http://localhost:8888/api' 
+                : '/api';
+            fetch(`${apiBase}/posts/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId, username: currentUser.username })
+            }).catch(() => {});
+        } catch(e) {}
     }
 
     function tipAuthorStars(authorUsername) {
