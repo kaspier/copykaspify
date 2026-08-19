@@ -922,10 +922,6 @@ function getWallPosts(username) {
         const key = 'kaspi_wall_' + username.toLowerCase();
         const stored = localStorage.getItem(key);
         if (!stored) {
-            if (username.toLowerCase() === 'naebkaspi') {
-                localStorage.setItem(key, JSON.stringify(SAMPLE_WALL_POSTS));
-                return SAMPLE_WALL_POSTS;
-            }
             return [];
         }
         return JSON.parse(stored);
